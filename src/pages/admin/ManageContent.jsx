@@ -5,7 +5,7 @@ import ManagePostsList from '@/pages/admin/ManagePostsList';
 import ManageCategories from '@/pages/admin/ManageCategories';
 import ManageSubcategories from '@/pages/admin/ManageSubcategories';
 import ManageSections from '@/pages/admin/ManageSections';
-import { Search, Filter, Check, X, ShieldAlert } from 'lucide-react';
+import { Search, Filter, Check, X, ShieldAlert, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { getPendingEdits, updatePostEditStatus, updatePost } from '@/lib/supabase/posts';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
     const [pendingEdits, setPendingEdits] = useState([]);
     const [subcategories, setSubcategories] = useState([]);
     const [silentDelete, setSilentDelete] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // Estado de carga
 
     const isAdmin = role === 'admin';
 
@@ -72,6 +73,17 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
 
     const safePosts = Array.isArray(posts) ? posts : [];
     const safeCategories = Array.isArray(categories) ? categories : [];
+
+    // Dispara el estado de carga cuando cambian los filtros
+    useEffect(() => {
+        setIsLoading(true);
+        // Usamos un timeout para simular la carga y permitir que el estado se actualice en la UI
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 300); // Un pequeño retardo para que el spinner sea visible
+        return () => clearTimeout(timer);
+    }, [searchTerm, categoryFilter, statusFilter, sortOrder]);
+
 
     const filteredAndSortedPosts = useMemo(() => {
         let filtered = safePosts;
@@ -197,7 +209,15 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
                             )}
                         </div>
                     </div>
-                    <ManagePostsList posts={filteredAndSortedPosts} onUpdate={onUpdate} silentDelete={silentDelete} />
+                    {/* Renderizado condicional del spinner o la lista de posts */}
+                    {isLoading ? (
+                        <div className="flex justify-center items-center h-40">
+                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                            <p className="ml-4 text-muted-foreground">Cargando recursos...</p>
+                        </div>
+                    ) : (
+                        <ManagePostsList posts={filteredAndSortedPosts} onUpdate={onUpdate} silentDelete={silentDelete} />
+                    )}
                 </div>
                 {isAdmin && (
                   <div className="space-y-8">

@@ -77,12 +77,15 @@ export const AuthProvider = ({ children }) => {
             await handleSession(null);
         }
         if (event === 'TOKEN_REFRESHED' && newSession) {
-             const currentTime = Math.floor(Date.now() / 1000);
-             if (newSession.expires_at > currentTime + 60) {
-                // Session is valid, do nothing to prevent unnecessary re-renders
-             } else {
-                await handleSignOut();
-             }
+    const currentTime = Math.floor(Date.now() / 1000);
+        // Solo cierra la sesión si el token ha expirado, con un pequeño margen.
+        if (newSession.expires_at < currentTime - 10) { 
+          await handleSignOut();
+        } else {
+            // Actualiza la sesión sin forzar un re-renderizado si no es necesario
+            setSession(newSession);
+            setUser(newSession.user);
+        }
         }
       }
     );

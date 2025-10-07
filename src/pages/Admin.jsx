@@ -143,14 +143,14 @@ const Admin = ({ onContentUpdate }) => {
     return (
         <div className="flex h-screen bg-background text-foreground">
             <div className={`fixed inset-0 z-30 bg-black/50 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
-            <aside className={`admin-sidebar fixed top-0 left-0 h-full z-40 transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} w-64`}>
-                <div className="p-4 flex items-center justify-between">
+            <aside className={`admin-sidebar fixed top-0 left-0 h-full z-40 transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} w-64 flex flex-col`}>
+                <div className="p-4 flex items-center justify-between flex-shrink-0">
                     <h1 className="text-2xl font-bold text-white">Admin</h1>
                     <button onClick={() => setIsSidebarOpen(false)} className="p-2 rounded-md hover:bg-gray-700 text-gray-300 md:hidden">
                         <X className="w-6 h-6" />
                     </button>
                 </div>
-                <nav className="mt-4">
+                <nav className="mt-4 flex-grow overflow-y-auto">
                     <ul>
                         {navItems.map(item => (
                             <li key={item.to}>
