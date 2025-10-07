@@ -1,0 +1,70 @@
+PROJECT DOCUMENTATION - Zona Vortex
+
+This document outlines the architecture, components, and data flow of the Zona Vortex web application.
+
+1. CORE STRUCTURE & ENTRY POINT
+==================================
+- `main.jsx`: The main entry point of the application. It sets up the React DOM, wraps the app in React.StrictMode, and provides essential contexts like BrowserRouter and AuthProvider.
+- `App.jsx`: The root component that defines the application's routing structure using React Router. It distinguishes between public routes, authentication routes, and private admin routes.
+- `index.css`: Global stylesheet using TailwindCSS. It defines the base styles, utility classes, and custom theme properties (CSS variables) for the entire site.
+
+2. ROUTING & LAYOUT
+=====================
+- `react-router-dom`: Manages all client-side navigation.
+- `App.jsx`: Defines all available routes.
+  - Public Routes (`/`, `/recursos`, `/recursos/:postSlug`): Accessible to all visitors. Wrapped in the main `Layout` component.
+  - Private Routes (`/control-panel-7d8a2b3c4f5e`, `/control-panel-7d8a2b3c4f5e/edit/:postSlug`): Secured admin area. Access is controlled by the `PrivateRoute` component, which checks for an authenticated user session via the `useAuth` hook.
+- `Layout.jsx`: A wrapper for public pages. It includes the `Header`, `Footer`, and `SidePanel`, creating the consistent look and feel of the site.
+- `Header.jsx`: The top navigation bar. Includes branding, links to main sections, and the toggle for the `SidePanel`.
+- `Footer.jsx`: The site's footer. Contains branding, quick links, contact info, and social media placeholders.
+- `SidePanel.jsx`: The collapsible sidebar for navigation, primarily for browsing post categories. Its state (open/closed) is managed by `LayoutContext`.
+
+3. STATE MANAGEMENT (CONTEXTS)
+==============================
+- `contexts/SupabaseAuthContext.jsx`: CRITICAL. Manages user authentication state (user, session, loading). It provides functions (`signIn`, `signUp`, `signOut`) to interact with Supabase Auth and exposes this state via the `useAuth` hook. `AuthProvider` must wrap the entire application.
+- `context/ThemeContext.jsx`: Manages the visual theme of the application (colors, etc.). It allows changing themes and persists the selection to localStorage.
+- `context/LayoutContext.jsx`: Manages the state of the layout, specifically whether the `SidePanel` is open or closed.
+- `context/AdContext.jsx`: Manages the configuration and visibility of ad blocks throughout the site.
+- `context/DownloadModalContext.jsx`: Controls the state of the download confirmation modal.
+
+4. BACKEND & DATA
+=================
+- **Supabase**: The backend-as-a-service provider for database and authentication.
+- `lib/customSupabaseClient.js`: Initializes and exports the Supabase client instance using credentials injected by the system.
+- `lib/supabase/posts.js`: Contains functions (`getPosts`, `getPostBySlug`, etc.) for all CRUD (Create, Read, Update, Delete) operations related to posts in the Supabase database.
+- `lib/supabase/categories.js`: Contains functions for fetching category data from Supabase.
+- **Authentication Flow**:
+  1. User navigates to the private admin login route.
+  2. `Login.jsx` uses the `signIn` function from `SupabaseAuthContext`.
+  3. Supabase verifies credentials. On success, `onAuthStateChange` in the context updates the user session.
+  4. `PrivateRoute` detects the valid session and grants access to the admin panel.
+
+5. ADMIN PANEL
+==============
+- **Entry Point**: `pages/Admin.jsx`. This component acts as a dashboard, using a Tabs component to switch between different management sections.
+- **Core Sections**:
+  - `PostForm.jsx` (Añadir Recurso): A comprehensive form for creating and editing posts. It's composed of smaller, specialized components:
+    - `post-form/PostFormInputs.jsx`: Basic fields like title, category, and excerpt.
+    - `post-form/PostFormSidebar.jsx`: Configuration for downloads.
+    - `post-form/PostFormSeo.jsx`: Fields for SEO (meta title, description, slug) and the main image upload.
+    - `post-form/KeywordInput.jsx`: A custom component for adding/removing SEO keywords.
+  - `ManageContent.jsx` (Gestionar Contenido): Displays existing posts and categories. It includes filtering and sorting controls and is composed of:
+    - `ManagePostsList.jsx`: Renders the list of posts with links to view or edit.
+    - `ManageCategories.jsx`: A section for adding, updating, and deleting categories (currently uses legacy localStorage functions).
+  - `ManageAds.jsx` (Gestionar Anuncios): Interface to control the visibility, dimensions, and code for different ad slots defined in `lib/ads.js`.
+  - `Analytics.jsx` (Estadísticas): Displays site-wide and per-post statistics for visits and downloads, based on data from `lib/stats.js`.
+  - `ManageTheme.jsx` (Personalización): Allows the admin to select a predefined theme or create a custom one. It interacts with `lib/themes.js` to apply and save theme configurations.
+- **Text Editor**:
+  - `react-quill`: The rich text editor used for post content.
+  - `lib/quill/`: Contains custom configuration, styles, and modules for the editor, including the custom ad block button.
+
+6. UI COMPONENTS (shadcn/ui)
+===========================
+- `components/ui/`: This directory contains all the reusable, low-level UI components like `Button`, `Input`, `Dialog`, `Toast`, `Select`, etc. These are built using Radix UI primitives and styled with TailwindCSS.
+- `lib/utils.js`: Contains the `cn` utility function, which merges TailwindCSS classes intelligently, essential for building flexible components.
+
+7. PUBLIC-FACING PAGES
+======================
+- `pages/Home.jsx`: The landing page of the site.
+- `pages/Recursos.jsx`: The main blog/resource listing page. It fetches and displays all posts and allows filtering by category via URL query parameters.
+- `pages/Post.jsx`: The detail page for a single post. It fetches the post data based on the `slug` from the URL and renders its content.
