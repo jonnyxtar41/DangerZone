@@ -1,3 +1,5 @@
+// src/pages/admin/post-form/CustomToolbar.jsx
+
 import React from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -55,15 +57,12 @@ export const CustomToolbar = ({ onAiAction }) => (
           </TooltipTrigger>
           <TooltipContent>Asistente de IA</TooltipContent>
         </Tooltip>
-        <DropdownMenuContent onSelect={(e) => {
-          const action = e.target.dataset.aiAction;
-          if (action) onAiAction(action);
-        }}>
-          <DropdownMenuItem data-ai-action="generate-content">Generar contenido desde título</DropdownMenuItem>
-          <DropdownMenuItem data-ai-action="improve-writing">Mejorar escritura</DropdownMenuItem>
-          <DropdownMenuItem data-ai-action="fix-grammar">Corregir gramática</DropdownMenuItem>
-          <DropdownMenuItem data-ai-action="make-shorter">Hacer más corto</DropdownMenuItem>
-          <DropdownMenuItem data-ai-action="make-longer">Hacer más largo</DropdownMenuItem>
+        <DropdownMenuContent>
+          <DropdownMenuItem onSelect={() => onAiAction('generate-content')}>Generar contenido desde título</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onAiAction('improve-writing')}>Mejorar escritura</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onAiAction('fix-grammar')}>Corregir gramática</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onAiAction('make-shorter')}>Hacer más corto</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onAiAction('make-longer')}>Hacer más largo</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <Tooltip>

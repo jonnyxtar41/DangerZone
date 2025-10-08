@@ -15,6 +15,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
     import { useNavigate } from 'react-router-dom';
     import { supabase } from '@/lib/customSupabaseClient';
     
+    
     const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
         const { toast } = useToast();
         const { user, role } = useAuth();
@@ -110,10 +111,11 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
     
             try {
                 const { data, error } = await supabase.functions.invoke('ai-assistant', {
-                    body: { prompt },
-                });
+                body: JSON.stringify({ prompt }),
+            });
     
                 if (error) throw error;
+                if (data.error) throw new Error(data.error)
     
                 const aiResponse = data.response;
     
@@ -122,19 +124,19 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
                         quill.deleteText(selection.index, selection.length);
                         quill.insertText(selection.index, aiResponse);
                     } else {
-                        quill.setText(aiResponse);
+                        const delta = quill.clipboard.convert(aiResponse);
+                        quill.setContents(delta, 'silent');
                     }
                     setContent(quill.root.innerHTML);
                 } else if (targetField === 'metaTitle') {
-                    setMetaTitle(aiResponse);
+                    setMetaTitle(aiResponse.replace(/["']/g, '')); // Limpiar comillas
                 } else if (targetField === 'metaDescription') {
-                    setMetaDescription(aiResponse);
+                    setMetaDescription(aiResponse.replace(/["']/g, '')); // Limpiar comillas
                 } else if (targetField === 'keywords') {
-                    setKeywords(aiResponse.split(',').map(k => k.trim()));
+                    setKeywords(aiResponse.split(',').map(k => k.trim()).filter(Boolean));
                 } else if (targetField === 'excerpt') {
                     setExcerpt(aiResponse);
                 }
-    
                 toast({ title: '✅ ¡Éxito!', description: 'La IA ha completado tu solicitud.' });
             } catch (error) {
                 toast({
