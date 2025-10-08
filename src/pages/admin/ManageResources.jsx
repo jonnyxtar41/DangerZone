@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { Database, Server, HardDrive, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Database, Server, HardDrive, RefreshCw, AlertTriangle, CheckCircle, Table, Key, Link2, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const StatCard = ({ title, value, icon, status, unit }) => {
@@ -53,25 +53,34 @@ const ManageResources = () => {
     const { toast } = useToast();
     const { session } = useAuth();
     const [healthData, setHealthData] = useState(null);
+    const [dbSchema, setDbSchema] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchHealthData = useCallback(async () => {
+    const fetchData = useCallback(async () => {
         if (!session) return;
         setLoading(true);
         try {
-            const { data, error } = await supabase.functions.invoke('system-health');
-            if (error) throw error;
-            setHealthData(data);
+            const [health, schema] = await Promise.all([
+                supabase.functions.invoke('system-health'),
+                supabase.functions.invoke('get-db-schema')
+            ]);
+            
+            if (health.error) throw health.error;
+            setHealthData(health.data);
+
+            if (schema.error) throw schema.error;
+            setDbSchema(schema.data);
+
         } catch (error) {
-            toast({ title: 'Error al cargar el estado del sistema', description: error.message, variant: 'destructive' });
+            toast({ title: 'Error al cargar los datos del sistema', description: error.message, variant: 'destructive' });
         } finally {
             setLoading(false);
         }
     }, [session, toast]);
 
     useEffect(() => {
-        fetchHealthData();
-    }, [fetchHealthData]);
+        fetchData();
+    }, [fetchData]);
 
     const dbSize = healthData?.database?.size || 'N/A';
     const storageSize = healthData?.storage?.size ? formatBytes(healthData.storage.size) : 'N/A';
@@ -85,7 +94,7 @@ const ManageResources = () => {
         >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                 <h2 className="text-3xl font-bold">Herramientas de Recursos</h2>
-                <Button onClick={fetchHealthData} disabled={loading}>
+                <Button onClick={fetchData} disabled={loading}>
                     <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                     {loading ? 'Actualizando...' : 'Actualizar'}
                 </Button>
@@ -93,22 +102,22 @@ const ManageResources = () => {
 
             {loading && !healthData ? (
                 <p className="text-center text-muted-foreground">Cargando estado del sistema...</p>
-            ) : healthData ? (
+            ) : (
                 <div className="space-y-8">
                     <div className="grid md:grid-cols-2 gap-6">
                         <StatCard
                             title="Base de Datos"
-                            value={dbSize.split(' ')[0]}
-                            unit={dbSize.split(' ')[1]}
+                            value={dbSize.split(' ')[0] || '0'}
+                            unit={dbSize.split(' ')[1] || 'B'}
                             icon={Database}
-                            status={healthData.database.status}
+                            status={healthData?.database.status || 'warning'}
                         />
                         <StatCard
                             title="Almacenamiento"
-                            value={storageSize.split(' ')[0]}
-                            unit={storageSize.split(' ')[1]}
+                            value={storageSize.split(' ')[0] || '0'}
+                            unit={storageSize.split(' ')[1] || 'B'}
                             icon={HardDrive}
-                            status={healthData.storage.status}
+                            status={healthData?.storage.status || 'warning'}
                         />
                     </div>
 
@@ -125,9 +134,46 @@ const ManageResources = () => {
                             )}
                         </div>
                     </div>
+
+                    <div className="glass-effect p-6 rounded-2xl">
+                        <h3 className="text-lg font-semibold text-gray-300 flex items-center gap-2 mb-4">
+                            <Share2 className="w-6 h-6 text-primary" />
+                            Esquema de la Base de Datos
+                        </h3>
+                        {dbSchema ? (
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {dbSchema.tables.map(table => (
+                                    <div key={table.table_name} className="bg-background/50 p-4 rounded-lg">
+                                        <h4 className="font-bold text-lg text-white flex items-center gap-2"><Table className="w-5 h-5 text-secondary-foreground" /> {table.table_name}</h4>
+                                        <ul className="mt-2 space-y-1 text-sm text-gray-400 pl-2 border-l-2 border-primary/30">
+                                            {table.columns.map(col => (
+                                                <li key={col.column_name} className="flex items-center gap-2 font-mono">
+                                                    {col.is_primary_key && <Key className="w-3 h-3 text-yellow-400" />}
+                                                    {col.column_name}: <span className="text-gray-500">{col.data_type}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        {table.foreign_keys.length > 0 && (
+                                            <div className="mt-3 pt-3 border-t border-white/10">
+                                                <h5 className="text-xs font-semibold uppercase text-gray-500 mb-2">Relaciones</h5>
+                                                <ul className="space-y-2 text-sm">
+                                                    {table.foreign_keys.map(fk => (
+                                                        <li key={fk.constraint_name} className="flex items-center gap-2 text-cyan-400 font-mono">
+                                                            <Link2 className="w-4 h-4" />
+                                                            <span>{fk.column_name} → {fk.foreign_table_name}({fk.foreign_column_name})</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                             <p className="text-muted-foreground">Cargando esquema de la base de datos...</p>
+                        )}
+                    </div>
                 </div>
-            ) : (
-                <p className="text-center text-muted-foreground">No se pudo cargar la información del sistema.</p>
             )}
         </motion.div>
     );

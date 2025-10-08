@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
@@ -9,25 +10,20 @@ import { Save, FileText, PlusCircle, Trash2, Upload } from 'lucide-react';
 import { getAllSiteContent, updateSiteContent } from '@/lib/supabase/siteContent';
 import { uploadSiteAsset } from '@/lib/supabase/assets';
 import { getSections, addSection, updateSection, deleteSection } from '@/lib/supabase/sections';
-import ReactQuill from 'react-quill';
-import { CustomToolbar } from '@/pages/admin/post-form/CustomToolbar';
-import { getQuillModules } from '@/lib/quill/quill.modules';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { allIcons } from '@/lib/icons.js';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import TiptapEditor from '@/components/TiptapEditor';
 
 const ManageSiteContent = ({ onUpdate }) => {
     const { toast } = useToast();
     const [content, setContent] = useState({});
     const [sections, setSections] = useState([]);
     const [loading, setLoading] = useState(true);
-    const quillRef = useRef(null);
     const [editingSection, setEditingSection] = useState(null);
     const [iconImageFile, setIconImageFile] = useState(null);
     const [iconImagePreview, setIconImagePreview] = useState('');
-
-    const quillModules = useMemo(() => getQuillModules(quillRef), []);
 
     const fetchAllData = async () => {
         setLoading(true);
@@ -254,7 +250,13 @@ const ManageSiteContent = ({ onUpdate }) => {
                 </div>
                 <div className="glass-effect p-6 rounded-2xl">
                     <Label className="text-xl font-semibold">Contenido de la Página de Políticas</Label>
-                    <div className="mt-2"><CustomToolbar /><ReactQuill ref={quillRef} theme="snow" value={content.policies_page_content || ''} onChange={(value) => handleContentChange('policies_page_content', value)} modules={quillModules} className="mt-2 bg-black/30 border-white/20 text-white" /></div>
+                    <div className="mt-2">
+                        <TiptapEditor
+                            content={content.policies_page_content || ''}
+                            onChange={(newContent) => handleContentChange('policies_page_content', newContent)}
+                            placeholder="Escribe el contenido de las políticas aquí..."
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -269,3 +271,4 @@ const ManageSiteContent = ({ onUpdate }) => {
 };
 
 export default ManageSiteContent;
+  

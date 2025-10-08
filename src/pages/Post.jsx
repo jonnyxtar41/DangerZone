@@ -54,7 +54,7 @@ const Post = ({ section }) => {
         }
         
         window.scrollTo(0, 0);
-    }, [postSlug, section]);
+    }, [postSlug,section]);
 
     useEffect(() => {
         fetchData();

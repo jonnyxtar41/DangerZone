@@ -61,6 +61,10 @@
   body {
     @apply bg-background text-foreground;
   }
+  .prose ::selection {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
 }
 
 .glass-effect {
@@ -70,25 +74,204 @@
 }
 
 .admin-sidebar {
-  background-color: #111827; /* Un fondo oscuro y sólido */
-  color: #D1D5DB; /* Texto claro para contraste */
+  background-color: #111827;
+  color: #D1D5DB;
 }
 
 .admin-sidebar-link {
-  color: #D1D5DB; /* Color de texto para los enlaces */
+  color: #D1D5DB;
   transition: background-color 0.2s, color 0.2s;
 }
 
 .admin-sidebar-link:hover {
-  background-color: #1F2937; /* Un color de fondo ligeramente más claro para el hover */
-  color: #FFFFFF; /* Texto blanco para el hover */
+  background-color: #1F2937;
+  color: #FFFFFF;
 }
 
 .admin-sidebar-link.active {
-  background-color: #2563EB; /* Un color primario vibrante para el enlace activo */
-  color: #FFFFFF; /* Texto blanco para el enlace activo */
+  background-color: #2563EB;
+  color: #FFFFFF;
 }
 
 .admin-sidebar-link.active .lucide {
-  color: #FFFFFF; /* Iconos blancos para el enlace activo */
+  color: #FFFFFF;
+}
+
+/* Tiptap Editor Styles */
+.ProseMirror-selectednode {
+  outline: 3px solid hsl(var(--primary));
+}
+
+.ProseMirror ::selection {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.tiptap {
+  @apply p-4 rounded-b-md min-h-[300px] focus:outline-none;
+  background-color: #f3f4f6;
+  color: #374151;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.tiptap:focus {
+  @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap h1, .tiptap h2, .tiptap h3, .tiptap h4, .tiptap h5, .tiptap h6 {
+  color: #111827;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.tiptap h1 { font-size: 2.25rem; }
+.tiptap h2 { font-size: 1.875rem; }
+.tiptap h3 { font-size: 1.5rem; }
+.tiptap h4 { font-size: 1.25rem; }
+.tiptap h5 { font-size: 1.125rem; }
+.tiptap h6 { font-size: 1rem; }
+
+.tiptap a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.tiptap a:hover {
+  text-decoration: underline;
+}
+
+.tiptap blockquote {
+  border-left: 4px solid #d1d5db;
+  padding-left: 1rem;
+  color: #4b5563;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.tiptap code {
+  background-color: rgba(97, 97, 97, 0.1);
+  color: #616161;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.tiptap pre {
+  background: #1f2937;
+  color: #d1d5db;
+  font-family: 'JetBrainsMono', monospace;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.tiptap pre code {
+  color: inherit;
+  padding: 0;
+  background: none;
+  font-size: 0.9rem;
+}
+
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.tiptap .ProseMirror-selectednode img {
+  outline: 3px solid hsl(var(--primary));
+}
+
+.tiptap .ad-blot-placeholder {
+    display: flex; 
+    align-items: center; 
+    gap: 1rem; 
+    color: #a0aec0;
+    border: 2px dashed #4a5568;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 2px solid #e5e7eb;
+  margin: 2rem 0;
+}
+
+.tiptap .text-left { text-align: left; }
+.tiptap .text-center { text-align: center; }
+.tiptap .text-right { text-align: right; }
+.tiptap .text-justify { text-align: justify; }
+
+.tiptap ul, .tiptap ol {
+  margin-left: 1.5rem;
+  padding-left: 0;
+}
+
+.tiptap ul li {
+  list-style-type: disc;
+}
+
+.tiptap ol li {
+  list-style-type: decimal;
+}
+
+.tiptap table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.tiptap th, .tiptap td {
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.tiptap th {
+  background-color: #e5e7eb;
+  font-weight: bold;
+}
+
+.tiptap iframe {
+  width: 100%;
+  height: 400px; /* Default height for videos */
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.tiptap .ProseMirror-selectednode iframe {
+  outline: 3px solid hsl(var(--primary));
+}
+
+.tiptap .ProseMirror-hideselection *::selection {
+  background: transparent;
+}
+.tiptap .ProseMirror-hideselection *::-moz-selection {
+  background: transparent;
+}
+.tiptap .ProseMirror-hideselection {
+  caret-color: transparent;
+}
+
+.tiptap .ProseMirror-hideselection ::selection {
+  background: transparent;
+}
+.tiptap .ProseMirror-hideselection ::-moz-selection {
+  background: transparent;
 }

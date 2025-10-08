@@ -28,7 +28,7 @@ const PostFormInputs = ({
                             <SelectValue placeholder="Selecciona una sección" />
                         </SelectTrigger>
                         <SelectContent>
-                            {sections.map(sec => (
+                            {sections && sections.map(sec => (
                                 <SelectItem key={sec.id} value={String(sec.id)}>{sec.name}</SelectItem>
                             ))}
                         </SelectContent>
@@ -36,12 +36,12 @@ const PostFormInputs = ({
                 </div>
                 <div>
                     <Label htmlFor="category">Categoría</Label>
-                    <Select value={postCategory} onValueChange={setPostCategory} disabled={!postSection || availableCategories.length === 0}>
+                    <Select value={postCategory} onValueChange={setPostCategory} disabled={!postSection || !availableCategories || availableCategories.length === 0}>
                         <SelectTrigger id="category" className="mt-2 w-full bg-black/30 border-white/20">
                             <SelectValue placeholder="Selecciona una categoría" />
                         </SelectTrigger>
                         <SelectContent>
-                            {availableCategories.map(cat => (
+                            {availableCategories && availableCategories.map(cat => (
                                 <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
                             ))}
                         </SelectContent>
@@ -49,12 +49,12 @@ const PostFormInputs = ({
                 </div>
                 <div>
                     <Label htmlFor="subcategory">Subcategoría</Label>
-                    <Select value={postSubcategory} onValueChange={setPostSubcategory} disabled={!postCategory || availableSubcategories.length === 0}>
+                    <Select value={postSubcategory} onValueChange={setPostSubcategory} disabled={!postCategory || !availableSubcategories || availableSubcategories.length === 0}>
                         <SelectTrigger id="subcategory" className="mt-2 w-full bg-black/30 border-white/20">
                             <SelectValue placeholder="Selecciona una subcategoría" />
                         </SelectTrigger>
                         <SelectContent>
-                            {availableSubcategories.map(sub => (
+                            {Array.isArray(availableSubcategories) && availableSubcategories.map(sub => (
                                 <SelectItem key={sub.id} value={String(sub.id)}>{sub.name}</SelectItem>
                             ))}
                         </SelectContent>
