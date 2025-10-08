@@ -50,13 +50,13 @@ This document outlines the architecture, components, and data flow of the Zona V
     - `post-form/KeywordInput.jsx`: A custom component for adding/removing SEO keywords.
   - `ManageContent.jsx` (Gestionar Contenido): Displays existing posts and categories. It includes filtering and sorting controls and is composed of:
     - `ManagePostsList.jsx`: Renders the list of posts with links to view or edit.
-    - `ManageCategories.jsx`: A section for adding, updating, and deleting categories (currently uses legacy localStorage functions).
+    - `ManageCategories.jsx`: A section for adding, updating, and deleting categories.
   - `ManageAds.jsx` (Gestionar Anuncios): Interface to control the visibility, dimensions, and code for different ad slots defined in `lib/ads.js`.
   - `Analytics.jsx` (Estadísticas): Displays site-wide and per-post statistics for visits and downloads, based on data from `lib/stats.js`.
   - `ManageTheme.jsx` (Personalización): Allows the admin to select a predefined theme or create a custom one. It interacts with `lib/themes.js` to apply and save theme configurations.
 - **Text Editor**:
-  - `react-quill`: The rich text editor used for post content.
-  - `lib/quill/`: Contains custom configuration, styles, and modules for the editor, including the custom ad block button.
+  - `TiptapEditor.jsx`: The rich text editor used for post content, based on TipTap.
+  - `TiptapToolbar.jsx`: A custom toolbar providing formatting options (bold, italic, lists, etc.) for the TipTap editor.
 
 6. UI COMPONENTS (shadcn/ui)
 ===========================
