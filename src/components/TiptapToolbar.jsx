@@ -25,11 +25,11 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
     }
 
     if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      editor.chain().extendMarkRange('link').unsetLink().run();
       return;
     }
 
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    editor.chain().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
   
   if (!editor) {
@@ -63,7 +63,8 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
     <Tooltip>
       <TooltipTrigger asChild>
         <button
-          onClick={() => editor.chain().focus()[command](...args).run()}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => editor.chain()[command](...args).run()}
           disabled={disabledCondition ?? (canCheck ? !editor.can()[canCheck]() : false)}
           className={`p-2 rounded hover:bg-muted ${editor.isActive(isActiveCheck || command, ...args) ? 'is-active bg-muted' : ''}`}
         >
@@ -98,15 +99,15 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
       <div className="w-px h-6 bg-muted-foreground mx-1" />
 
       <Tooltip>
-        <TooltipTrigger asChild><button onClick={setLink} className={`p-2 rounded hover:bg-muted ${editor.isActive('link') ? 'is-active bg-muted' : ''}`}><Link className="w-4 h-4" /></button></TooltipTrigger>
+        <TooltipTrigger asChild><button onMouseDown={(e) => e.preventDefault()} onClick={setLink} className={`p-2 rounded hover:bg-muted ${editor.isActive('link') ? 'is-active bg-muted' : ''}`}><Link className="w-4 h-4" /></button></TooltipTrigger>
         <TooltipContent><p>Añadir enlace</p></TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger asChild><button onClick={handleImageClick} className="p-2 rounded hover:bg-muted"><ImageIcon className="w-4 h-4" /></button></TooltipTrigger>
+        <TooltipTrigger asChild><button onMouseDown={(e) => e.preventDefault()} onClick={handleImageClick} className="p-2 rounded hover:bg-muted"><ImageIcon className="w-4 h-4" /></button></TooltipTrigger>
         <TooltipContent><p>Añadir imagen</p></TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger asChild><button onClick={addYoutubeVideo} className="p-2 rounded hover:bg-muted"><Youtube className="w-4 h-4" /></button></TooltipTrigger>
+        <TooltipTrigger asChild><button onMouseDown={(e) => e.preventDefault()} onClick={addYoutubeVideo} className="p-2 rounded hover:bg-muted"><Youtube className="w-4 h-4" /></button></TooltipTrigger>
         <TooltipContent><p>Añadir video de YouTube</p></TooltipContent>
       </Tooltip>
 
@@ -123,7 +124,7 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
         <TooltipTrigger asChild>
             <input
                 type="color"
-                onInput={event => editor.chain().focus().setColor(event.target.value).run()}
+                onInput={event => editor.chain().setColor(event.target.value).run()}
                 value={editor.getAttributes('textStyle').color || '#ffffff'}
                 className="w-6 h-6 bg-transparent border-none cursor-pointer"
             />
@@ -137,14 +138,14 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
         <Tooltip>
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button onMouseDown={(e) => e.preventDefault()} variant="ghost" size="icon" className="h-8 w-8">
                 <Table className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
           </TooltipTrigger>
           <TooltipContent>Herramientas de Tabla</TooltipContent>
         </Tooltip>
-        <DropdownMenuContent>
+        <DropdownMenuContent onMouseDown={(e) => e.preventDefault()}>
           <DropdownMenuItem onSelect={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}><Table className="w-4 h-4 mr-2" />Insertar Tabla</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => editor.chain().focus().addColumnBefore().run()} disabled={!editor.can().addColumnBefore()}><Columns className="w-4 h-4 mr-2" />Añadir Columna Antes</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => editor.chain().focus().addColumnAfter().run()} disabled={!editor.can().addColumnAfter()}><Columns className="w-4 h-4 mr-2" />Añadir Columna Después</DropdownMenuItem>
@@ -165,7 +166,7 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
             <PaintBucket className="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="color"
-              onInput={event => editor.chain().focus().setCellAttribute('backgroundColor', event.target.value).run()}
+              onInput={event => editor.chain().setCellAttribute('backgroundColor', event.target.value).run()}
               className="w-full h-full opacity-0 cursor-pointer"
               disabled={!editor.can().setCellAttribute('backgroundColor', '')}
             />
@@ -185,14 +186,14 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
         <Tooltip>
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button onMouseDown={(e) => e.preventDefault()} variant="ghost" size="icon" className="h-8 w-8">
                 <Sparkles className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
           </TooltipTrigger>
           <TooltipContent>Asistente de IA</TooltipContent>
         </Tooltip>
-        <DropdownMenuContent>
+        <DropdownMenuContent onMouseDown={(e) => e.preventDefault()}>
           <DropdownMenuItem onSelect={onGenerateContent}>Generar contenido con prompt...</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => onAiAction('improve-writing')}>Mejorar escritura</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => onAiAction('fix-grammar')}>Corregir gramática</DropdownMenuItem>
