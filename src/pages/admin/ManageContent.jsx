@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,7 +18,7 @@ import { Link } from 'react-router-dom';
 
 const ManageContent = ({ posts, categories, sections, onUpdate }) => {
     const { toast } = useToast();
-    const { user, role } = useAuth();
+    const { user, permissions } = useAuth();
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -27,7 +28,7 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
     const [silentDelete, setSilentDelete] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const isAdmin = role === 'admin';
+    const isAdmin = permissions?.['manage-content'];
 
     const fetchSubcategories = useCallback(async () => {
         const allSubcategories = await getSubcategories();
@@ -184,6 +185,7 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
                                         <SelectItem value="all">Todos los estados</SelectItem>
                                         <SelectItem value="published">Publicado</SelectItem>
                                         <SelectItem value="draft">Borrador</SelectItem>
+                                        {isAdmin && <SelectItem value="scheduled">Programado</SelectItem>}
                                         {isAdmin && <SelectItem value="pending_approval">Pendiente</SelectItem>}
                                     </SelectContent>
                                 </Select>
@@ -234,3 +236,4 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
 };
 
 export default ManageContent;
+  

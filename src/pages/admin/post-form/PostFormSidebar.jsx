@@ -1,69 +1,151 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { DollarSign, Percent } from 'lucide-react';
+import { DollarSign, Percent, CalendarClock, Save, Book, Trash2, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/use-toast';
+import { getTemplates, saveTemplate, deleteTemplate } from '@/lib/supabase/templates';
 
 const PostFormSidebar = ({
-    hasDownload,
-    setHasDownload,
-    downloadType,
-    setDownloadType,
-    downloadUrl,
-    setDownloadUrl,
-    setDownloadFile,
-    initialData,
-    customAuthorName,
-    setCustomAuthorName,
-    showAuthor,
-    setShowAuthor,
-    showDate,
-    setShowDate,
-    showMainImageInPost,
-    setShowMainImageInPost,
-    mainImageSizeInPost,
-    setMainImageSizeInPost,
-    isPremium,
-    setIsPremium,
-    price,
-    setPrice,
-    currency,
-    setCurrency,
-    isDiscountActive,
-    setIsDiscountActive,
-    discountPercentage,
-    setDiscountPercentage,
-
+    // ... existing props
+    hasDownload, setHasDownload,
+    downloadType, setDownloadType,
+    downloadUrl, setDownloadUrl,
+    setDownloadFile, initialData,
+    customAuthorName, setCustomAuthorName,
+    showAuthor, setShowAuthor,
+    showDate, setShowDate,
+    showMainImageInPost, setShowMainImageInPost,
+    mainImageSizeInPost, setMainImageSizeInPost,
+    isPremium, setIsPremium,
+    price, setPrice, currency, setCurrency,
+    isDiscountActive, setIsDiscountActive,
+discountPercentage, setDiscountPercentage,
+    // New props for scheduling and templates
+    isScheduled, setIsScheduled,
+    publishedAt, setPublishedAt,
+    onLoadTemplate,
+    getTemplateData,
 }) => {
     const { permissions } = useAuth();
+    const { toast } = useToast();
     const canManageContent = permissions?.['manage-content'];
-    const canMonetize = permissions?.['payments'];
+
+    // State for templates management
+    const [templates, setTemplates] = useState([]);
+    const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+    const [newTemplateName, setNewTemplateName] = useState('');
+    const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
+
+    const fetchTemplates = async () => {
+        setIsLoadingTemplates(true);
+        const data = await getTemplates();
+        setTemplates(data);
+        setIsLoadingTemplates(false);
+    };
+
+    useEffect(() => {
+        fetchTemplates();
+    }, []);
+
+    const handleSaveTemplate = async () => {
+        if (!newTemplateName) {
+            toast({ title: 'Nombre de plantilla requerido', variant: 'destructive' });
+            return;
+        }
+        const templateData = getTemplateData();
+        const { error } = await saveTemplate(newTemplateName, templateData);
+        if (error) {
+            toast({ title: 'Error al guardar plantilla', description: error.message, variant: 'destructive' });
+        } else {
+            toast({ title: 'Plantilla guardada con éxito' });
+            setNewTemplateName('');
+            setIsTemplateModalOpen(false);
+            fetchTemplates();
+        }
+    };
+    
+    const handleDeleteTemplate = async (templateId) => {
+        const { error } = await deleteTemplate(templateId);
+        if (error) {
+            toast({ title: 'Error al eliminar plantilla', variant: 'destructive' });
+        } else {
+            toast({ title: 'Plantilla eliminada' });
+            fetchTemplates();
+        }
+    };
+
     return (
         <div className="space-y-6 glass-effect p-6 rounded-lg">
             {canManageContent && (
-                <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Opciones de Autor</h3>
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="show-author">Mostrar Autor</Label>
-                        <Switch id="show-author" checked={showAuthor} onCheckedChange={setShowAuthor} />
-                    </div>
-                    {showAuthor && (
-                        <div>
-                            <Label htmlFor="custom-author-name">Nombre de Autor Personalizado</Label>
-                            <Input
-                                id="custom-author-name"
-                                value={customAuthorName}
-                                onChange={(e) => setCustomAuthorName(e.target.value)}
-                                placeholder="Dejar en blanco para usar el predeterminado"
-                                className="mt-1 bg-input"
-                            />
+                <>
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Programación</h3>
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="is-scheduled">Programar Publicación</Label>
+                            <Switch id="is-scheduled" checked={isScheduled} onCheckedChange={setIsScheduled} />
                         </div>
-                    )}
-                </div>
+                        {isScheduled && (
+                            <div className="space-y-2">
+                                <Label htmlFor="published-at">Fecha y Hora de Publicación</Label>
+                                <Input
+                                    id="published-at"
+                                    type="datetime-local"
+                                    value={publishedAt}
+                                    onChange={(e) => setPublishedAt(e.target.value)}
+                                    className="bg-input"
+                                />
+                            </div>
+                        )}
+                    </div>
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Plantillas de Contenido</h3>
+                        <div className="space-y-2">
+                            <Select onValueChange={(templateId) => onLoadTemplate(templates.find(t => t.id === parseInt(templateId)))}>
+                                <SelectTrigger className="bg-input">
+                                    <SelectValue placeholder="Cargar desde plantilla" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {isLoadingTemplates ? <div className="p-2"><Loader2 className="w-4 h-4 animate-spin" /></div> : templates.map(t => (
+                                        <SelectItem key={t.id} value={String(t.id)}>
+                                            <div className="flex justify-between items-center w-full">
+                                                <span>{t.name}</span>
+                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(t.id); }}>
+                                                    <Trash2 className="w-3 h-3 text-destructive" />
+                                                </Button>
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Button variant="outline" className="w-full" onClick={() => setIsTemplateModalOpen(true)}>
+                                <Save className="w-4 h-4 mr-2" />
+                                Guardar como Plantilla
+                            </Button>
+                        </div>
+                    </div>
+                </>
             )}
+
+            <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Opciones de Autor</h3>
+                <div className="flex items-center justify-between">
+                    <Label htmlFor="show-author">Mostrar Autor</Label>
+                    <Switch id="show-author" checked={showAuthor} onCheckedChange={setShowAuthor} />
+                </div>
+                {showAuthor && (
+                    <div>
+                        <Label htmlFor="custom-author-name">Nombre de Autor Personalizado</Label>
+                        <Input id="custom-author-name" value={customAuthorName} onChange={(e) => setCustomAuthorName(e.target.value)} placeholder="Dejar en blanco para usar el predeterminado" className="mt-1 bg-input" />
+                    </div>
+                )}
+            </div>
 
             <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Opciones de Visualización</h3>
@@ -79,9 +161,7 @@ const PostFormSidebar = ({
                     <div>
                         <Label>Tamaño de Imagen en Post</Label>
                         <Select value={mainImageSizeInPost} onValueChange={setMainImageSizeInPost}>
-                            <SelectTrigger className="mt-1 bg-input">
-                                <SelectValue />
-                            </SelectTrigger>
+                            <SelectTrigger className="mt-1 bg-input"><SelectValue /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="small">Pequeño</SelectItem>
                                 <SelectItem value="medium">Mediano</SelectItem>
@@ -99,7 +179,7 @@ const PostFormSidebar = ({
                     <Switch id="has-download" checked={hasDownload} onCheckedChange={setHasDownload} />
                 </div>
                 {hasDownload && (
-                    <div className="space-y-4">
+                     <div className="space-y-4">
                         <RadioGroup value={downloadType} onValueChange={setDownloadType}>
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="url" id="url" />
@@ -136,7 +216,6 @@ const PostFormSidebar = ({
                 )}
             </div>
 
-
             {canManageContent && (
                 <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Monetización</h3>
@@ -150,16 +229,7 @@ const PostFormSidebar = ({
                                 <Label htmlFor="price">Precio</Label>
                                 <div className="flex items-center gap-2">
                                     <DollarSign className="h-5 w-5 text-muted-foreground" />
-                                    <Input
-                                        id="price"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="19.99"
-                                        value={price}
-                                        onChange={(e) => setPrice(e.target.value)}
-                                        className="bg-input"
-                                    />
+                                    <Input id="price" type="number" step="0.01" min="0" placeholder="19.99" value={price} onChange={(e) => setPrice(e.target.value)} className="bg-input" />
                                     <Select value={currency} onValueChange={setCurrency}>
                                         <SelectTrigger className="w-[120px] bg-input"><SelectValue /></SelectTrigger>
                                         <SelectContent>
@@ -170,8 +240,6 @@ const PostFormSidebar = ({
                                     </Select>
                                 </div>
                             </div>
-
-                    
                             <div className="flex items-center justify-between pt-4">
                                 <Label htmlFor="is-discount-active">Aplicar Descuento</Label>
                                 <Switch id="is-discount-active" checked={isDiscountActive} onCheckedChange={setIsDiscountActive} />
@@ -181,28 +249,31 @@ const PostFormSidebar = ({
                                     <Label htmlFor="discount">Porcentaje de Descuento</Label>
                                     <div className="flex items-center gap-2">
                                         <Percent className="h-5 w-5 text-muted-foreground" />
-                                        <Input
-                                            id="discount"
-                                            type="number"
-                                            step="1"
-                                            min="1"
-                                            max="100"
-                                            placeholder="Ej: 25"
-                                            value={discountPercentage}
-                                            onChange={(e) => setDiscountPercentage(e.target.value)}
-                                            className="bg-input"
-                                        />
+                                        <Input id="discount" type="number" step="1" min="1" max="100" placeholder="Ej: 25" value={discountPercentage} onChange={(e) => setDiscountPercentage(e.target.value)} className="bg-input" />
                                     </div>
                                 </div>
                             )}
-                         
                         </div>
                     )}
                 </div>
             )}
-
+            
+            <Dialog open={isTemplateModalOpen} onOpenChange={setIsTemplateModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Guardar Plantilla</DialogTitle>
+                        <DialogDescription>Dale un nombre a tu nueva plantilla para usarla más tarde.</DialogDescription>
+                    </DialogHeader>
+                    <Input value={newTemplateName} onChange={(e) => setNewTemplateName(e.target.value)} placeholder="Ej: Plantilla para Guías"/>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsTemplateModalOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleSaveTemplate}>Guardar</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
 
 export default PostFormSidebar;
+  

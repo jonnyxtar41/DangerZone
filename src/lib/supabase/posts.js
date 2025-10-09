@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/customSupabaseClient';
 import { logActivity } from '@/lib/supabase/log';
 
@@ -11,75 +12,39 @@ export const getPosts = async (options = {}) => {
         searchQuery,
         includeDrafts = false,
         includePending = false,
+        includeScheduled = false,
         userId
     } = options;
 
     let query = supabase
         .from('posts')
         .select(`
-            id,
-            created_at,
-            title,
-            author,
-            category_id,
-            subcategory_id,
-            excerpt,
-            date,
-            image_description,
-            main_image_url,
-            slug,
-            show_author,
-            custom_author_name,
-            show_date,
-            status,
-            user_id,
-            section_id,
-            is_premium,
-            price,
-            currency,
-            download, 
-            sections!inner(
-                id,
-                name,
-                slug
-            ),
-            categories!left(
-                id,
-                name,
-                gradient,
-                section_id
-            ),
-            subcategories (
-                id,
-                name
-            )
+            id, created_at, title, author, category_id, subcategory_id,
+            excerpt, date, image_description, main_image_url, slug,
+            show_author, custom_author_name, show_date, status, user_id,
+            section_id, is_premium, price, currency, download, published_at,
+            sections!inner(id, name, slug),
+            categories!left(id, name, gradient, section_id),
+            subcategories (id, name)
         `, { count: 'exact' });
 
     const statuses = ['published'];
     if (includeDrafts) statuses.push('draft');
     if (includePending) statuses.push('pending_approval');
+    if (includeScheduled) statuses.push('scheduled');
     
+    // Public view should not see scheduled posts before their time
+    if (!includeScheduled) {
+        query = query.or(`status.neq.scheduled,and(status.eq.scheduled,published_at.lte.now())`);
+    }
+
     query = query.in('status', statuses);
     
-    if (section) {
-        query = query.eq('sections.slug', section);
-    }
-    
-    if (categoryName) {
-        query = query.eq('categories.name', categoryName);
-    }
-
-    if (subcategoryName) {
-        query = query.eq('subcategories.name', subcategoryName);
-    }
-    
-    if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%`);
-    }
-
-    if (userId) {
-        query = query.eq('user_id', userId);
-    }
+    if (section) query = query.eq('sections.slug', section);
+    if (categoryName) query = query.eq('categories.name', categoryName);
+    if (subcategoryName) query = query.eq('subcategories.name', subcategoryName);
+    if (searchQuery) query = query.or(`title.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%`);
+    if (userId) query = query.eq('user_id', userId);
 
     const from = (page - 1) * limit;
     const to = from + limit - 1;
@@ -102,21 +67,12 @@ export const getPostBySlug = async (slug) => {
         .from('posts')
         .select(`
             *,
-            sections (
-                name,
-                slug
-            ),
-            categories (
-                name,
-                gradient,
-                section_id
-            ),
-            subcategories (
-                name
-            )
+            sections (name, slug),
+            categories (name, gradient, section_id),
+            subcategories (name)
         `)
         .eq('slug', slug)
-        .in('status', ['published', 'draft', 'pending_approval'])
+        .or(`status.eq.published,and(status.eq.scheduled,published_at.lte.now()),status.eq.draft,status.eq.pending_approval`)
         .limit(1)
         .maybeSingle();
 
@@ -172,11 +128,7 @@ export const addPostEdit = async (editData) => {
 export const getPendingEdits = async () => {
     const { data, error } = await supabase
         .from('post_edits')
-        .select(`
-            *,
-            posts (title, slug),
-            editor:editor_id (email)
-        `)
+        .select(`*, posts (title, slug), editor:editor_id (email)`)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
     
@@ -287,3 +239,4 @@ export const getDownloadablePosts = async (count) => {
 
   return data;
 };
+  
