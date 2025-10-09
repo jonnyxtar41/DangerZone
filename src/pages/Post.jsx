@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { Calendar, User, ChevronLeft, Download, Share2, BookOpen, ChevronsRight, FileDown } from 'lucide-react';
@@ -42,6 +42,7 @@ const Post = ({ section }) => {
   const [similarPosts, setSimilarPosts] = useState([]);
   const { toast } = useToast();
   const { showModal } = useDownloadModal();
+  const navigate = useNavigate();
 
   const fetchData = useCallback(async () => {
     const foundPost = await getPostBySlug(postSlug);
@@ -82,6 +83,12 @@ const Post = ({ section }) => {
       return;
     }
 
+    if (post.is_premium) {
+          // Si es premium, redirige a la página de pago
+          navigate(`/checkout/${post.slug}`);
+          return;
+     }
+
     const downloadFunction = () => {
       incrementPostStat(post.id, 'downloads');
       
@@ -91,6 +98,10 @@ const Post = ({ section }) => {
          return;
       }
       
+
+
+
+
       window.open(downloadUrl, '_blank', 'noopener,noreferrer');
       toast({
         title: "📥 ¡Descarga iniciada!",

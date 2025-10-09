@@ -2,31 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import { useDownloadModal } from "@/context/DownloadModalContext";
 import AdBlock from '@/components/AdBlock';
 import { FolderHeart as HandHeart, Coffee, Download, Loader2 } from 'lucide-react';
-
-const DonationButton = ({ amount, onDonate }) => (
-    <Button
-        variant="outline"
-        size="lg"
-        className="flex-1 text-md border-primary/50 text-primary hover:bg-primary/10"
-        onClick={() => onDonate(amount)}
-    >
-        ${amount}
-    </Button>
-);
+import { useNavigate } from 'react-router-dom';
 
 const DownloadModal = () => {
     const { isModalOpen, hideModal, downloadInfo, confirmDownload } = useDownloadModal();
-    const { toast } = useToast();
     const [countdown, setCountdown] = useState(10);
+    const navigate = useNavigate();
 
     useEffect(() => {
         let timer;
         if (isModalOpen) {
-            setCountdown(10); 
+            setCountdown(10);
             timer = setInterval(() => {
                 setCountdown(prev => {
                     if (prev <= 1) {
@@ -44,11 +33,9 @@ const DownloadModal = () => {
         return null;
     }
 
-    const handleDonation = (amount) => {
-        toast({
-            title: "💖 ¡Muchas gracias por tu apoyo!",
-            description: `Tu donación de $${amount} nos ayuda a seguir creando contenido increíble. (Esta es una simulación)`,
-        });
+    const handleDonateClick = () => {
+        hideModal();
+        navigate('/donar');
     };
 
     const handleConfirm = () => {
@@ -86,15 +73,15 @@ const DownloadModal = () => {
                 </div>
 
                 <div className="bg-background/20 px-6 py-6">
-                     <h3 className="text-lg font-semibold text-center mb-4 flex items-center justify-center gap-2">
-                        <Coffee className="w-5 h-5 text-primary"/>
+                    <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full text-md border-primary/50 text-primary hover:bg-primary/10"
+                        onClick={handleDonateClick}
+                    >
+                        <Coffee className="w-5 h-5 mr-2"/>
                         Invítanos a un café
-                     </h3>
-                     <div className="flex gap-3">
-                        <DonationButton amount={1} onDonate={handleDonation} />
-                        <DonationButton amount={5} onDonate={handleDonation} />
-                        <DonationButton amount={10} onDonate={handleDonation} />
-                     </div>
+                    </Button>
                 </div>
 
                 <DialogFooter className="p-6 bg-gray-900 flex flex-col gap-3">

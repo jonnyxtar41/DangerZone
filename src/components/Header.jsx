@@ -1,10 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Menu, X, Home, MoreHorizontal, ChevronDown } from 'lucide-react';
+
+import { Menu, X, Home, MoreHorizontal, ChevronDown, Heart } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import { useLayout } from '@/context/LayoutContext.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import * as Icons from 'lucide-react';
+import { Button } from '@/components/ui/button'
 
 const Header = ({ sections = [], siteContent = {} }) => {
   const { isSidePanelOpen, toggleSidePanel } = useLayout();
@@ -29,7 +31,7 @@ const Header = ({ sections = [], siteContent = {} }) => {
       <nav className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-             <button
+            <button
               onClick={toggleSidePanel}
               className="text-foreground z-50"
               aria-label="Toggle Menu"
@@ -88,7 +90,18 @@ const Header = ({ sections = [], siteContent = {} }) => {
                 </DropdownMenu>
               )}
             </div>
+
+            <div className="pl-4">
+              <Button asChild className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white font-semibold rounded-full pulse-glow-orange">
+                <Link to="/donar">
+                  <Heart className="w-4 h-4 mr-2" />
+                  Apoyar
+                </Link>
+              </Button>
+            </div>
           </div>
+
+
         </div>
       </nav>
     </motion.header>

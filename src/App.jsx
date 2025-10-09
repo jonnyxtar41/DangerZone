@@ -28,6 +28,7 @@ const DownloadModal = lazy(() => import('@/components/DownloadModal'));
 const Suggestions = lazy(() => import('@/pages/Suggestions'));
 const Policies = lazy(() => import('@/pages/Policies'));
 const Donate = lazy(() => import('@/pages/Donate'));
+const Checkout = lazy(() => import('@/pages/Checkout'));
 
 const LoadingFallback = () => (
   <div className="w-full h-screen flex items-center justify-center bg-background">
@@ -114,6 +115,7 @@ function App() {
                         <Route path="/sugerencias" element={<Suggestions />} />
                         <Route path="/politicas" element={<Policies />} />
                         <Route path="/donar" element={<Donate />} />
+                        <Route path="/checkout/:postSlug" element={<Checkout />} /> 
                         <Route path="*" element={<Navigate to="/" />} />
                       </Routes>
                     </Layout>

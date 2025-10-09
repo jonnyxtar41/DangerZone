@@ -55,6 +55,9 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
   const [price, setPrice] = useState(initialData.price || '');
   const [currency, setCurrency] = useState(initialData.currency || 'USD');
 
+  const [isDiscountActive, setIsDiscountActive] = useState(initialData.is_discount_active || false);
+  const [discountPercentage, setDiscountPercentage] = useState(initialData.discount_percentage || '');
+
   const [isSaved, setIsSaved] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isAiPromptOpen, setIsAiPromptOpen] = useState(false);
@@ -355,6 +358,8 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
       is_premium: isPremium,
       price: isPremium ? parseFloat(price) : null,
       currency: isPremium ? currency : null,
+      is_discount_active: isDiscountActive,
+      discount_percentage: isDiscountActive ? parseInt(discountPercentage, 10) : null,
     };
     const success = await onSave(postData, isEditing, initialData);
 
@@ -468,6 +473,10 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
             setPrice={setPrice}
             currency={currency}
             setCurrency={setCurrency}
+            isDiscountActive={isDiscountActive}
+            setIsDiscountActive={setIsDiscountActive}
+            discountPercentage={discountPercentage}
+            setDiscountPercentage={setDiscountPercentage}
           />
         </div>
         <PostFormSeo
