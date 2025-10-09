@@ -1,3 +1,4 @@
+
 import React, { useEffect, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -10,9 +11,36 @@ import TextAlign from '@tiptap/extension-text-align';
 import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import Youtube from '@tiptap/extension-youtube';
+import Highlight from '@tiptap/extension-highlight';
+
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableHeader from '@tiptap/extension-table-header';
+import BaseTableCell from '@tiptap/extension-table-cell';
+
 import TiptapToolbar from './TiptapToolbar';
 import { useToast } from '@/components/ui/use-toast';
-import Mark from '@tiptap/extension-mark';
+
+const TableCell = BaseTableCell.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      backgroundColor: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-background-color'),
+        renderHTML: attributes => {
+          if (!attributes.backgroundColor) {
+            return {};
+          }
+          return {
+            'data-background-color': attributes.backgroundColor,
+            style: `background-color: ${attributes.backgroundColor}`,
+          };
+        },
+      },
+    };
+  },
+});
 
 const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aquí...", onAiAction, onGenerateContent, getEditor }) => {
   const { toast } = useToast();
@@ -65,11 +93,19 @@ const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aqu
       Youtube.configure({
         controls: false,
       }),
-      Mark.configure({
+      Highlight.configure({
+        multicolor: true,
         HTMLAttributes: {
           class: 'bg-yellow-200/50 dark:bg-yellow-400/50',
         },
       }),
+      Table.configure({
+        resizable: true,
+        allowTableNodeSelection: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content: content,
     onUpdate: ({ editor }) => {
@@ -105,10 +141,10 @@ const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aqu
       getEditor(editor);
     }
   }, [editor, getEditor]);
-  
+
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-        editor.commands.setContent(content, false);
+      editor.commands.setContent(content, false);
     }
   }, [content, editor]);
 
@@ -121,3 +157,4 @@ const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aqu
 };
 
 export default TiptapEditor;
+  

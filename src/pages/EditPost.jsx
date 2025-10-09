@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { getPostBySlug, updatePost, addPostEdit } from '@/lib/supabase/posts';
 import { getCategories } from '@/lib/supabase/categories';
-import { getSections } from '@/lib/supabase/sections'; // Importa getSections
+import { getSections } from '@/lib/supabase/sections';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import PostForm from '@/pages/admin/PostForm';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
@@ -43,11 +43,12 @@ const EditPost = () => {
         fetchData();
     }, [fetchData]);
 
-    const handleUpdatePost = async (updatedData) => {
+    const handleUpdatePost = async (updatedData, isEditing, initialData) => {
         const isAdmin = role === 'admin';
+        const statusToSubmit = updatedData.status;
         
-        if (isAdmin || (post.user_id === user.id && post.status === 'draft')) {
-            const { data, error } = await updatePost(post.id, updatedData);
+        if (isAdmin) {
+            const { data, error } = await updatePost(post.id, { ...updatedData, status: statusToSubmit });
             if (error) {
                  toast({
                     title: "❌ Error al actualizar",
@@ -60,7 +61,6 @@ const EditPost = () => {
                     title: "✅ ¡Recurso actualizado!",
                     description: `"${updatedData.title}" ha sido actualizado correctamente.`,
                 });
-                navigate('/control-panel-7d8a2b3c4f5e/dashboard');
                 return true;
             }
         } else {
@@ -68,7 +68,7 @@ const EditPost = () => {
                 post_id: post.id,
                 editor_id: user.id,
                 proposed_data: updatedData,
-                status: 'pending'
+                status: 'pending_approval'
             };
             const { error } = await addPostEdit(editPayload);
             if (error) {
@@ -76,7 +76,6 @@ const EditPost = () => {
                 return false;
             } else {
                 toast({ title: "✅ ¡Enviado para revisión!", description: "Tus cambios han sido enviados para que un administrador los apruebe." });
-                navigate('/control-panel-7d8a2b3c4f5e/dashboard');
                 return true;
             }
         }
@@ -127,6 +126,7 @@ const EditPost = () => {
                             sections={sections} 
                             categories={categories}
                             onSave={handleUpdatePost}
+                            onUpdate={fetchData}
                             initialData={{
                                 ...post,
                                 show_author: post.show_author ?? true,

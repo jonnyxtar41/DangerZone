@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import PostFormInputs from '@/pages/admin/post-form/PostFormInputs';
 import PostFormSidebar from '@/pages/admin/post-form/PostFormSidebar';
 import PostFormSeo from '@/pages/admin/post-form/PostFormSeo';
-import { Save, Send, PlusCircle } from 'lucide-react';
+import { Save, Send, PlusCircle, Trash2 } from 'lucide-react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { getCategories } from '@/lib/supabase/categories';
 import { getSubcategories } from '@/lib/supabase/subcategories';
@@ -15,8 +15,10 @@ import TiptapEditor from '@/components/TiptapEditor';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { deletePost } from '@/lib/supabase/posts';
 
-const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
+const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) => {
     const { toast } = useToast();
     const { user, role } = useAuth();
     const navigate = useNavigate();
@@ -161,7 +163,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
               setCustomPrompt('');
             }
         }
-    }, [toast, title]);
+    }, [toast, title, editorRef]);
     
     const handleGenerateContentClick = () => {
         setIsAiPromptOpen(true);
@@ -266,6 +268,15 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
             return;
         }
 
+        if (status === 'published' && !mainImagePreview) {
+            toast({
+                title: "❌ Imagen destacada requerida",
+                description: "No se puede publicar un recurso sin una imagen principal. Por favor, añade una o guárdalo como borrador.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         if (isPremium && (!price || parseFloat(price) <= 0)) {
             toast({
                 title: "❌ Precio no válido",
@@ -321,6 +332,25 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
         if (success && !isEditing) {
             setIsSaved(true);
         } else if (success && isEditing) {
+            navigate('/control-panel-7d8a2b3c4f5e/dashboard');
+        }
+    };
+
+    const handleDeletePost = async () => {
+        if (!isEditing) return;
+        const { error } = await deletePost(initialData.id, initialData.title, true);
+        if (error) {
+            toast({
+                title: '❌ Error al eliminar',
+                description: error.message,
+                variant: 'destructive',
+            });
+        } else {
+            toast({
+                title: '🗑️ Recurso eliminado',
+                description: `"${initialData.title}" ha sido eliminado permanentemente.`,
+            });
+            if (onUpdate) onUpdate();
             navigate('/control-panel-7d8a2b3c4f5e/dashboard');
         }
     };
@@ -420,24 +450,50 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
                     onAiAction={handleAiAction}
                     isAiLoading={isAiLoading}
                 />
-                <div className="pt-8 mt-8 border-t-2 border-white/10 flex flex-col sm:flex-row justify-end gap-4">
-                    {!isAdmin ? (
-                        <Button type="button" size="lg" onClick={() => handleFormSubmit('pending_approval')} className="bg-gradient-to-r from-orange-500 to-yellow-600 hover:from-orange-600 hover:to-yellow-700 text-white px-8 py-6 text-lg font-semibold">
-                            <Send className="mr-2 h-5 w-5" />
-                            {isEditing ? 'Proponer Edición' : 'Enviar para Revisión'}
-                        </Button>
-                    ) : (
-                        <>
-                            <Button type="button" variant="outline" size="lg" onClick={() => handleFormSubmit('draft')} className="px-8 py-6 text-lg">
-                                <Save className="mr-2 h-5 w-5" />
-                                Guardar Borrador
-                            </Button>
-                            <Button type="button" size="lg" onClick={() => handleFormSubmit('published')} className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-6 text-lg font-semibold">
+                <div className="pt-8 mt-8 border-t-2 border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div className="flex-1">
+                        {isEditing && isAdmin && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" size="lg" className="px-8 py-6 text-lg">
+                                        <Trash2 className="mr-2 h-5 w-5" />
+                                        Eliminar Recurso
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>¿Confirmas la eliminación?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Esta acción es irreversible y eliminará permanentemente el recurso "{title}".
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDeletePost}>Eliminar</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
+                    </div>
+                    <div className="flex-1 flex flex-col sm:flex-row justify-end gap-4">
+                        {isAdmin ? (
+                            <>
+                                <Button type="button" variant="outline" size="lg" onClick={() => handleFormSubmit('draft')} className="px-8 py-6 text-lg">
+                                    <Save className="mr-2 h-5 w-5" />
+                                    Guardar Borrador
+                                </Button>
+                                <Button type="button" size="lg" onClick={() => handleFormSubmit('published')} className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-6 text-lg font-semibold">
+                                    <Send className="mr-2 h-5 w-5" />
+                                    {isEditing ? 'Actualizar y Publicar' : 'Publicar Recurso'}
+                                </Button>
+                            </>
+                        ) : (
+                            <Button type="button" size="lg" onClick={() => handleFormSubmit('pending_approval')} className="bg-gradient-to-r from-orange-500 to-yellow-600 hover:from-orange-600 hover:to-yellow-700 text-white px-8 py-6 text-lg font-semibold">
                                 <Send className="mr-2 h-5 w-5" />
-                                {isEditing ? 'Actualizar Recurso' : 'Publicar Recurso'}
+                                {isEditing ? 'Proponer Edición' : 'Enviar para Revisión'}
                             </Button>
-                        </>
-                    )}
+                        )}
+                    </div>
                 </div>
             </form>
              <Dialog open={isAiPromptOpen} onOpenChange={setIsAiPromptOpen}>

@@ -5,7 +5,7 @@ import ManagePostsList from '@/pages/admin/ManagePostsList';
 import ManageCategories from '@/pages/admin/ManageCategories';
 import ManageSubcategories from '@/pages/admin/ManageSubcategories';
 import ManageSections from '@/pages/admin/ManageSections';
-import { Search, Filter, Check, X, ShieldAlert, Loader2 } from 'lucide-react';
+import { Search, Filter, Check, X, ShieldAlert, Loader2, Edit } from 'lucide-react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { getPendingEdits, updatePostEditStatus, updatePost } from '@/lib/supabase/posts';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { getSubcategories } from '@/lib/supabase/subcategories';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Link } from 'react-router-dom';
 
 const ManageContent = ({ posts, categories, sections, onUpdate }) => {
     const { toast } = useToast();
@@ -24,7 +25,7 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
     const [pendingEdits, setPendingEdits] = useState([]);
     const [subcategories, setSubcategories] = useState([]);
     const [silentDelete, setSilentDelete] = useState(false);
-    const [isLoading, setIsLoading] = useState(false); // Estado de carga
+    const [isLoading, setIsLoading] = useState(false);
 
     const isAdmin = role === 'admin';
 
@@ -58,15 +59,16 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
         }
 
         if (newStatus === 'approved') {
-            const { error: postUpdateError } = await updatePost(edit.post_id, edit.proposed_data);
+            const finalData = { ...edit.proposed_data, status: 'published' };
+            const { error: postUpdateError } = await updatePost(edit.post_id, finalData);
             if (postUpdateError) {
-                toast({ title: 'Error al aplicar la edición', description: postUpdateError.message, variant: 'destructive' });
+                toast({ title: 'Error al aplicar y publicar la edición', description: postUpdateError.message, variant: 'destructive' });
                 await updatePostEditStatus(edit.id, 'pending', null);
                 return;
             }
         }
         
-        toast({ title: `Edición ${newStatus === 'approved' ? 'aprobada' : 'rechazada'}`, description: 'La revisión se ha completado.' });
+        toast({ title: `Edición ${newStatus === 'approved' ? 'aprobada y publicada' : 'rechazada'}`, description: 'La revisión se ha completado.' });
         fetchPendingEdits();
         onUpdate();
     };
@@ -74,13 +76,11 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
     const safePosts = Array.isArray(posts) ? posts : [];
     const safeCategories = Array.isArray(categories) ? categories : [];
 
-    // Dispara el estado de carga cuando cambian los filtros
     useEffect(() => {
         setIsLoading(true);
-        // Usamos un timeout para simular la carga y permitir que el estado se actualice en la UI
         const timer = setTimeout(() => {
             setIsLoading(false);
-        }, 300); // Un pequeño retardo para que el spinner sea visible
+        }, 300);
         return () => clearTimeout(timer);
     }, [searchTerm, categoryFilter, statusFilter, sortOrder]);
 
@@ -138,7 +138,10 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
                                     <p className="text-sm text-gray-400">Editado por: {edit.editor.email}</p>
                                 </div>
                                 <div className="flex gap-2">
-                                    <Button size="sm" variant="outline" onClick={() => handleReview(edit, 'approved')}><Check className="w-4 h-4 mr-2" />Aprobar</Button>
+                                    <Link to={`/control-panel-7d8a2b3c4f5e/edit/${edit.posts.slug}`}>
+                                        <Button size="sm" variant="outline"><Edit className="w-4 h-4 mr-2" />Revisar y Editar</Button>
+                                    </Link>
+                                    <Button size="sm" variant="default" onClick={() => handleReview(edit, 'approved')}><Check className="w-4 h-4 mr-2" />Aprobar y Publicar</Button>
                                     <Button size="sm" variant="destructive" onClick={() => handleReview(edit, 'rejected')}><X className="w-4 h-4 mr-2" />Rechazar</Button>
                                 </div>
                             </div>
@@ -209,7 +212,6 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
                             )}
                         </div>
                     </div>
-                    {/* Renderizado condicional del spinner o la lista de posts */}
                     {isLoading ? (
                         <div className="flex justify-center items-center h-40">
                             <Loader2 className="w-8 h-8 animate-spin text-primary" />
