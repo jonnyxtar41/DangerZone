@@ -20,7 +20,7 @@ import { deletePost } from '@/lib/supabase/posts';
 
 const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) => {
     const { toast } = useToast();
-    const { user, role } = useAuth();
+    const { user, permissions } = useAuth();
     const navigate = useNavigate();
     const editorRef = useRef(null);
     const [title, setTitle] = useState(initialData.title || '');
@@ -59,7 +59,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
     const [customPrompt, setCustomPrompt] = useState('');
 
     const isEditing = !!initialData.id;
-    const isAdmin = role === 'admin';
+    const isAdmin = permissions?.['manage-content'];
 
     const handleAiAction = useCallback(async (action, promptOverride = '') => {
         setIsAiLoading(true);
@@ -192,6 +192,8 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
         };
         fetchSubcategories();
     }, [postCategoryId]);
+
+
 
     const handleSectionChange = (sectionId) => {
         setPostSectionId(sectionId);
@@ -336,7 +338,11 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
         }
     };
 
-    const handleDeletePost = async () => {
+    
+
+
+
+     const handleDeletePost = async () => {
         if (!isEditing) return;
         const { error } = await deletePost(initialData.id, initialData.title, true);
         if (error) {
@@ -355,6 +361,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
         }
     };
 
+    
     if (isSaved && !isEditing) {
         return (
             <motion.div
@@ -372,6 +379,8 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
             </motion.div>
         );
     }
+
+
 
     return (
         <motion.div

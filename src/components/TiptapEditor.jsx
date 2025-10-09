@@ -32,6 +32,23 @@ const ResizableImageTemplate = ({ node, updateAttributes, editor, getPos }) => {
     editor.chain().focus().deleteRange({ from: pos, to: pos + node.nodeSize }).run();
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      e.target.blur();
+    }
+  };
+
+  const handleSizeChange = (attribute, value) => {
+    const trimmedValue = value.trim();
+    if (/^\d+$/.test(trimmedValue)) {
+      updateAttributes({ [attribute]: `${trimmedValue}%` });
+    } else {
+      updateAttributes({ [attribute]: trimmedValue });
+    }
+  };
+
   return (
     <NodeViewWrapper
       className="resizable-image-wrapper relative group"
@@ -52,14 +69,16 @@ const ResizableImageTemplate = ({ node, updateAttributes, editor, getPos }) => {
           className="w-24 bg-input text-foreground text-xs p-1 rounded"
           placeholder="Ancho (ej: 50%)"
           defaultValue={width}
-          onBlur={(e) => updateAttributes({ width: e.target.value })}
+          onBlur={(e) => handleSizeChange('width', e.target.value)}
+          onKeyDown={handleKeyDown}
         />
         <input
           type="text"
           className="w-24 bg-input text-foreground text-xs p-1 rounded"
           placeholder="Alto (ej: auto)"
           defaultValue={height}
-          onBlur={(e) => updateAttributes({ height: e.target.value })}
+          onBlur={(e) => handleSizeChange('height', e.target.value)}
+          onKeyDown={handleKeyDown}
         />
       </div>
     </NodeViewWrapper>

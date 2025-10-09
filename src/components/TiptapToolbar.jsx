@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import {
   Bold, Italic, Underline, Strikethrough,
   Heading1, Heading2, Heading3, Pilcrow,
-  List, ListOrdered, ListX,
+  List, ListOrdered,
   Quote, Code,
   Undo, Redo,
   Link, Image as ImageIcon, Youtube,
@@ -20,30 +20,19 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
     const previousUrl = editor.getAttributes('link').href;
     const url = window.prompt('URL', previousUrl);
 
-    if (url === null) {
-      return;
-    }
-
+    if (url === null) return;
     if (url === '') {
       editor.chain().extendMarkRange('link').unsetLink().run();
       return;
     }
-
     editor.chain().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
   
-  if (!editor) {
-    return null;
-  }
+  if (!editor) return null;
 
   const addYoutubeVideo = () => {
     const url = prompt('Enter YouTube URL');
-
-    if (url) {
-      editor.commands.addYoutubeVideo({
-        src: url,
-      });
-    }
+    if (url) editor.commands.addYoutubeVideo({ src: url });
   };
 
   const handleImageClick = () => {
@@ -52,9 +41,7 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
     input.accept = 'image/*';
     input.onchange = (e) => {
       const file = e.target.files[0];
-      if (file) {
-        onImageUpload(file);
-      }
+      if (file) onImageUpload(file);
     };
     input.click();
   };
@@ -66,7 +53,7 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain()[command](...args).run()}
           disabled={disabledCondition ?? (canCheck ? !editor.can()[canCheck]() : false)}
-          className={`p-2 rounded hover:bg-muted ${editor.isActive(isActiveCheck || command, ...args) ? 'is-active bg-muted' : ''}`}
+          className={`p-2 rounded transition-colors hover:bg-accent/20 ${editor.isActive(isActiveCheck || command, ...args) ? 'is-active bg-accent text-accent-foreground' : ''}`}
         >
           {icon}
         </button>
@@ -99,15 +86,15 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
       <div className="w-px h-6 bg-muted-foreground mx-1" />
 
       <Tooltip>
-        <TooltipTrigger asChild><button onMouseDown={(e) => e.preventDefault()} onClick={setLink} className={`p-2 rounded hover:bg-muted ${editor.isActive('link') ? 'is-active bg-muted' : ''}`}><Link className="w-4 h-4" /></button></TooltipTrigger>
+        <TooltipTrigger asChild><button onMouseDown={(e) => e.preventDefault()} onClick={setLink} className={`p-2 rounded transition-colors hover:bg-accent/20 ${editor.isActive('link') ? 'is-active bg-accent text-accent-foreground' : ''}`}><Link className="w-4 h-4" /></button></TooltipTrigger>
         <TooltipContent><p>Añadir enlace</p></TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger asChild><button onMouseDown={(e) => e.preventDefault()} onClick={handleImageClick} className="p-2 rounded hover:bg-muted"><ImageIcon className="w-4 h-4" /></button></TooltipTrigger>
+        <TooltipTrigger asChild><button onMouseDown={(e) => e.preventDefault()} onClick={handleImageClick} className="p-2 rounded transition-colors hover:bg-accent/20"><ImageIcon className="w-4 h-4" /></button></TooltipTrigger>
         <TooltipContent><p>Añadir imagen</p></TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger asChild><button onMouseDown={(e) => e.preventDefault()} onClick={addYoutubeVideo} className="p-2 rounded hover:bg-muted"><Youtube className="w-4 h-4" /></button></TooltipTrigger>
+        <TooltipTrigger asChild><button onMouseDown={(e) => e.preventDefault()} onClick={addYoutubeVideo} className="p-2 rounded transition-colors hover:bg-accent/20"><Youtube className="w-4 h-4" /></button></TooltipTrigger>
         <TooltipContent><p>Añadir video de YouTube</p></TooltipContent>
       </Tooltip>
 
