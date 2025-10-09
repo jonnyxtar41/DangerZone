@@ -174,4 +174,47 @@
   background-color: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
 }
-  
+
+/* --- ESTILOS PARA EL EDITOR DE TEXTO --- */
+
+/* Soluciona el espaciado extra en las celdas de la tabla */
+.ProseMirror td p {
+  margin: 0;
+}
+
+/* Hace visibles los manejadores para redimensionar columnas de la tabla */
+.ProseMirror .column-resize-handle {
+  background-color: hsl(var(--primary));
+  width: 4px;
+}
+
+/* --- Alineación de Imágenes --- */
+
+/* Contenedor de la imagen fuera de una tabla */
+.resizable-image-wrapper[data-align="left"] {
+  margin-right: auto;
+}
+.resizable-image-wrapper[data-align="center"] {
+  margin-left: auto;
+  margin-right: auto;
+}
+.resizable-image-wrapper[data-align="right"] {
+  margin-left: auto;
+}
+
+/* Contenedor de la imagen DENTRO de una tabla */
+.ProseMirror td .resizable-image-wrapper {
+  display: flex; /* Permite centrar el contenido interno */
+}
+.ProseMirror td .resizable-image-wrapper > div {
+  margin: 0 !important; /* Resetea los márgenes automáticos dentro de la tabla */
+}
+.ProseMirror td .resizable-image-wrapper[data-align="left"] {
+  justify-content: flex-start;
+}
+.ProseMirror td .resizable-image-wrapper[data-align="center"] {
+  justify-content: center;
+}
+.ProseMirror td .resizable-image-wrapper[data-align="right"] {
+  justify-content: flex-end;
+}

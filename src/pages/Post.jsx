@@ -109,8 +109,8 @@ const Post = ({ section }) => {
             }
             if (domNode.name === 'img') {
                 const { class: className, style, ...attribs } = domNode.attribs;
-                const alignClass = className?.match(/ql-align-(center|right|left)/)?.[0] || '';
-                
+                const alignClass = className?.match(/align-(center|right|left)/)?.[0] || '';
+
                 const styleObject = {};
                 if (style) {
                     style.split(';').forEach(declaration => {
@@ -129,7 +129,8 @@ const Post = ({ section }) => {
             }
         }
     };
-    
+
+        
     const getImageSizeClass = (size) => {
         switch (size) {
             case 'small':
