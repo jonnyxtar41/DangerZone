@@ -15,7 +15,7 @@ const EditPost = () => {
     const { postSlug } = useParams();
     const navigate = useNavigate();
     const { toast } = useToast();
-    const { user, role, signOut } = useAuth();
+    const { user, permissions, signOut } = useAuth();
     
     const [post, setPost] = useState(null);
     const [categories, setCategories] = useState([]);
@@ -44,7 +44,7 @@ const EditPost = () => {
     }, [fetchData]);
 
     const handleUpdatePost = async (updatedData, isEditing, initialData) => {
-        const isAdmin = role === 'admin';
+        const isAdmin = permissions?.['manage-content'];
         const statusToSubmit = updatedData.status;
         
         if (isAdmin) {
