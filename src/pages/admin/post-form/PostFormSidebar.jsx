@@ -36,13 +36,14 @@ const PostFormSidebar = ({
     setIsDiscountActive,
     discountPercentage,
     setDiscountPercentage,
-}) => {
-    const { role } = useAuth();
-    const isAdmin = role === 'admin';
 
+}) => {
+    const { permissions } = useAuth();
+    const canManageContent = permissions?.['manage-content'];
+    const canMonetize = permissions?.['payments'];
     return (
         <div className="space-y-6 glass-effect p-6 rounded-lg">
-            {isAdmin && (
+            {canManageContent && (
                 <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Opciones de Autor</h3>
                     <div className="flex items-center justify-between">
@@ -136,7 +137,7 @@ const PostFormSidebar = ({
             </div>
 
 
-            {isAdmin && (
+            {canManageContent && (
                 <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Monetización</h3>
                     <div className="flex items-center justify-between">

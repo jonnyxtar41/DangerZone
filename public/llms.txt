@@ -1,6 +1,7 @@
 ## Pages
 - [- Zona Vortex](/recursos): No description available
 - [Actualizar Contraseña - Admin Panel](/updatepassword): No description available
+- [Comprar:](/checkout): No description available
 - [Editar Recurso -](/editpost): No description available
 - [Login - Admin Panel](/login): No description available
 - [Políticas - Zona Vortex](/policies): Políticas y términos de uso de Zona Vortex.
