@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import Hero from '@/components/Hero';
 import { getCategories } from '@/lib/supabase/categories';
-import { getRandomPosts, getRandomPostsWithImages } from '@/lib/supabase/posts';
+import { getRandomPosts, getRandomPostsWithImages, getDownloadablePosts } from '@/lib/supabase/posts';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 const Features = lazy(() => import('@/components/Features'));
@@ -22,16 +22,20 @@ const Home = () => {
     categories: [],
     blogPosts: [],
     recentPosts: [],
+    downloadablePosts: [], // AÑADIDO: Nuevo estado para posts descargables
     loading: true,
   });
+
 
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
-        const [categoriesData, blogPostsData, recentPostsData] = await Promise.all([
+        // Añade la llamada a la API
+        const [categoriesData, blogPostsData, recentPostsData, downloadablePostsData] = await Promise.all([
           getCategories(),
           getRandomPostsWithImages(3),
           getRandomPosts(3),
+          getDownloadablePosts(6), 
         ]);
 
         const shuffleArray = (array) => {
@@ -50,6 +54,7 @@ const Home = () => {
           categories: shuffledCategories.slice(0, 6),
           blogPosts: blogPostsData,
           recentPosts: recentPostsData,
+          downloadablePosts: downloadablePostsData, 
           loading: false,
         });
       } catch (error) {
@@ -80,11 +85,13 @@ const Home = () => {
       <Suspense fallback={<LoadingSection />}>
         <AdBlock className="container mx-auto" />
       </Suspense>
+
+
       <Suspense fallback={<LoadingSection />}>
         <RecentPosts posts={homeData.recentPosts} />
       </Suspense>
       <Suspense fallback={<LoadingSection />}>
-        <Downloads />
+        <Downloads posts={homeData.downloadablePosts} />
       </Suspense>
     </>
   );

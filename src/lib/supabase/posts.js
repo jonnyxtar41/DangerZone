@@ -37,6 +37,7 @@ export const getPosts = async (options = {}) => {
             is_premium,
             price,
             currency,
+            download, 
             sections!inner(
                 id,
                 name,
@@ -268,4 +269,21 @@ export const getAllPostStats = async () => {
     }
 
     return data;
+};
+
+export const getDownloadablePosts = async (count) => {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*, categories(name, gradient), sections(slug)')
+    .eq('status', 'published')
+    .not('download', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(count);
+
+  if (error) {
+    console.error('Error fetching downloadable posts:', error);
+    return [];
+  }
+
+  return data;
 };

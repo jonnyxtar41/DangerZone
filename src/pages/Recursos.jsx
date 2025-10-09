@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
-import { Calendar, User, Search } from 'lucide-react';
+import { Calendar, User, Search, FileDown  } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -172,6 +172,12 @@ const Recursos = ({ section }) => {
                                         <div className="overflow-hidden relative">
                                             <img className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500" alt={post.image_description} src={post.main_image_url || "https://images.unsplash.com/photo-1595872018818-97555653a011"} />
                                             <div className={`absolute inset-0 bg-gradient-to-t ${post.categories?.gradient || 'from-gray-500 to-gray-700'} opacity-50`}></div>
+                                            {post.download && (
+                                                <div className="absolute top-2 right-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                                                    <FileDown size={14} />
+                                                    <span>Descargable</span>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="p-6 flex flex-col flex-grow">
                                             <div className="mb-4">
