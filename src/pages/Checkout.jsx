@@ -7,8 +7,7 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/customSupabaseClient';
-import { getAllSiteContent } from '@/lib/supabase/siteContent';
-import { addPayment } from '@/lib/supabase/payments';
+import { getAllSiteContent, addPayment } from '@/lib/supabase/siteContent';
 import { getPostBySlug, incrementPostStat } from '@/lib/supabase/posts';
 import { ShoppingCart, CreditCard, Loader2, Tag } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
