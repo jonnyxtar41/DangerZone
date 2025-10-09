@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import { LayoutProvider } from '@/context/LayoutContext.jsx';
+import { LayoutProvider } from '@/context/LayoutContext';
 import { AdProvider } from '@/context/AdContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { DownloadModalProvider } from '@/context/DownloadModalContext';
