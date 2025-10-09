@@ -40,3 +40,27 @@ export const uploadSiteAsset = async (file, path) => {
       
     return publicUrlData.publicUrl;
 };
+
+export const uploadDownloadableAsset = async (file) => {
+    if (!file) return null;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('downloadable-assets')
+      .upload(filePath, file);
+
+    if (error) {
+      console.error('Error uploading downloadable asset:', error);
+      return null;
+    }
+    
+    const { data: publicUrlData } = supabase.storage
+      .from('downloadable-assets')
+      .getPublicUrl(data.path);
+
+    return publicUrlData.publicUrl;
+};
+  

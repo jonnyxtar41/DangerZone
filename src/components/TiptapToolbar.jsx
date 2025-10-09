@@ -27,7 +27,7 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
     }
     editor.chain().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
-  
+
   if (!editor) return null;
 
   const addYoutubeVideo = () => {
@@ -75,14 +75,14 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
       <ToolbarButton command="toggleHeading" args={[{ level: 2 }]} icon={<Heading2 className="w-4 h-4" />} tooltip="Encabezado 2" isActiveCheck="heading" />
       <ToolbarButton command="toggleHeading" args={[{ level: 3 }]} icon={<Heading3 className="w-4 h-4" />} tooltip="Encabezado 3" isActiveCheck="heading" />
       <ToolbarButton command="setParagraph" icon={<Pilcrow className="w-4 h-4" />} tooltip="Párrafo" isActiveCheck="paragraph" />
-      
+
       <div className="w-px h-6 bg-muted-foreground mx-1" />
 
       <ToolbarButton command="toggleBulletList" icon={<List className="w-4 h-4" />} tooltip="Lista de viñetas" isActiveCheck="bulletList" />
       <ToolbarButton command="toggleOrderedList" icon={<ListOrdered className="w-4 h-4" />} tooltip="Lista ordenada" isActiveCheck="orderedList" />
       <ToolbarButton command="toggleBlockquote" icon={<Quote className="w-4 h-4" />} tooltip="Cita" isActiveCheck="blockquote" />
       <ToolbarButton command="toggleCodeBlock" icon={<Code className="w-4 h-4" />} tooltip="Bloque de código" isActiveCheck="codeBlock" />
-      
+
       <div className="w-px h-6 bg-muted-foreground mx-1" />
 
       <Tooltip>
@@ -104,23 +104,23 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
       <ToolbarButton command="setTextAlign" args={['center']} icon={<AlignCenter className="w-4 h-4" />} tooltip="Centrar" isActiveCheck={{ textAlign: 'center' }} />
       <ToolbarButton command="setTextAlign" args={['right']} icon={<AlignRight className="w-4 h-4" />} tooltip="Alinear a la derecha" isActiveCheck={{ textAlign: 'right' }} />
       <ToolbarButton command="setTextAlign" args={['justify']} icon={<AlignJustify className="w-4 h-4" />} tooltip="Justificar" isActiveCheck={{ textAlign: 'justify' }} />
-      
+
       <div className="w-px h-6 bg-muted-foreground mx-1" />
-      
+
       <Tooltip>
         <TooltipTrigger asChild>
-            <input
-                type="color"
-                onInput={event => editor.chain().setColor(event.target.value).run()}
-                value={editor.getAttributes('textStyle').color || '#ffffff'}
-                className="w-6 h-6 bg-transparent border-none cursor-pointer"
-            />
+          <input
+            type="color"
+            onInput={event => editor.chain().setColor(event.target.value).run()}
+            value={editor.getAttributes('textStyle').color || '#ffffff'}
+            className="w-6 h-6 bg-transparent border-none cursor-pointer"
+          />
         </TooltipTrigger>
         <TooltipContent><p>Color de texto</p></TooltipContent>
       </Tooltip>
-      
+
       <div className="w-px h-6 bg-muted-foreground mx-1" />
-      
+
       <DropdownMenu>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -161,12 +161,12 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
         </TooltipTrigger>
         <TooltipContent><p>Color de fondo de celda</p></TooltipContent>
       </Tooltip>
-      
+
       <div className="w-px h-6 bg-muted-foreground mx-1" />
 
       <ToolbarButton command="undo" icon={<Undo className="w-4 h-4" />} canCheck="undo" tooltip="Deshacer" />
       <ToolbarButton command="redo" icon={<Redo className="w-4 h-4" />} canCheck="redo" tooltip="Rehacer" />
-      
+
       <div className="w-px h-6 bg-muted-foreground mx-1" />
 
       {onAiAction && <DropdownMenu>

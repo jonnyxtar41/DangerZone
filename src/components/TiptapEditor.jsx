@@ -84,7 +84,6 @@ const ResizableImageTemplate = ({ node, updateAttributes, editor, getPos }) => {
     </NodeViewWrapper>
   );
 };
-
 // --- Extensión de Tiptap para la imagen ---
 const ResizableImage = BaseImage.extend({
   addAttributes() {
