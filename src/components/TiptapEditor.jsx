@@ -1,4 +1,3 @@
-
 import React, { useEffect, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -13,8 +12,9 @@ import { Color } from '@tiptap/extension-color';
 import Youtube from '@tiptap/extension-youtube';
 import TiptapToolbar from './TiptapToolbar';
 import { useToast } from '@/components/ui/use-toast';
+import Mark from '@tiptap/extension-mark';
 
-const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aquí...", onAiAction, getEditor }) => {
+const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aquí...", onAiAction, onGenerateContent, getEditor }) => {
   const { toast } = useToast();
 
   const handleImageUpload = useCallback((file) => {
@@ -65,6 +65,11 @@ const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aqu
       Youtube.configure({
         controls: false,
       }),
+      Mark.configure({
+        HTMLAttributes: {
+          class: 'bg-yellow-200/50 dark:bg-yellow-400/50',
+        },
+      }),
     ],
     content: content,
     onUpdate: ({ editor }) => {
@@ -109,11 +114,10 @@ const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aqu
 
   return (
     <div className="w-full">
-      <TiptapToolbar editor={editor} onAiAction={onAiAction} onImageUpload={handleImageUpload} />
+      <TiptapToolbar editor={editor} onAiAction={onAiAction} onImageUpload={handleImageUpload} onGenerateContent={onGenerateContent} />
       <EditorContent editor={editor} />
     </div>
   );
 };
 
 export default TiptapEditor;
-  

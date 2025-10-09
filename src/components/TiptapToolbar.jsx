@@ -1,4 +1,3 @@
-
 import React, { useCallback } from 'react';
 import {
   Bold, Italic, Underline, Strikethrough,
@@ -14,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from './ui/button';
 
-const TiptapToolbar = ({ editor, onAiAction, onImageUpload }) => {
+const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent }) => {
   const setLink = useCallback(() => {
     if (!editor) return;
     const previousUrl = editor.getAttributes('link').href;
@@ -150,7 +149,7 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload }) => {
           <TooltipContent>Asistente de IA</TooltipContent>
         </Tooltip>
         <DropdownMenuContent>
-          <DropdownMenuItem onSelect={() => onAiAction('generate-content')}>Generar contenido</DropdownMenuItem>
+          <DropdownMenuItem onSelect={onGenerateContent}>Generar contenido con prompt...</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => onAiAction('improve-writing')}>Mejorar escritura</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => onAiAction('fix-grammar')}>Corregir gramática</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => onAiAction('make-shorter')}>Hacer más corto</DropdownMenuItem>
@@ -162,4 +161,3 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload }) => {
 };
 
 export default TiptapToolbar;
-  

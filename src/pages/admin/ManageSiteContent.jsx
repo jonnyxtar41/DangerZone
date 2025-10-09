@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, FileText, PlusCircle, Trash2, Upload } from 'lucide-react';
+import { Save, FileText, PlusCircle, Trash2, Upload, Bell } from 'lucide-react';
 import { getAllSiteContent, updateSiteContent } from '@/lib/supabase/siteContent';
 import { uploadSiteAsset } from '@/lib/supabase/assets';
 import { getSections, addSection, updateSection, deleteSection } from '@/lib/supabase/sections';
@@ -249,6 +248,21 @@ const ManageSiteContent = ({ onUpdate }) => {
                     <Textarea id="license_text" value={content.license_text || ''} onChange={(e) => handleContentChange('license_text', e.target.value)} className="mt-2 bg-black/30 border-white/20" rows={4} />
                 </div>
                 <div className="glass-effect p-6 rounded-2xl">
+                    <Label htmlFor="notification_prompt_frequency_days" className="text-xl font-semibold flex items-center gap-2">
+                        <Bell className="w-5 h-5" />
+                        Frecuencia de Notificaciones (Días)
+                    </Label>
+                    <Input 
+                        id="notification_prompt_frequency_days" 
+                        type="number"
+                        value={content.notification_prompt_frequency_days || '30'} 
+                        onChange={(e) => handleContentChange('notification_prompt_frequency_days', e.target.value)} 
+                        className="mt-2 bg-black/30 border-white/20" 
+                        placeholder="Ej: 30" 
+                    />
+                    <p className="text-sm text-muted-foreground mt-2">Días a esperar antes de volver a pedir permiso para notificaciones si el usuario lo ignora.</p>
+                </div>
+                <div className="glass-effect p-6 rounded-2xl">
                     <Label className="text-xl font-semibold">Contenido de la Página de Políticas</Label>
                     <div className="mt-2">
                         <TiptapEditor
@@ -271,4 +285,3 @@ const ManageSiteContent = ({ onUpdate }) => {
 };
 
 export default ManageSiteContent;
-  

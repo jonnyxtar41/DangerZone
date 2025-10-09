@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
@@ -13,7 +12,9 @@ import { getSubcategories } from '@/lib/supabase/subcategories';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
 import TiptapEditor from '@/components/TiptapEditor';
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
     const { toast } = useToast();
@@ -52,30 +53,34 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
 
     const [isSaved, setIsSaved] = useState(false);
     const [isAiLoading, setIsAiLoading] = useState(false);
+    const [isAiPromptOpen, setIsAiPromptOpen] = useState(false);
+    const [customPrompt, setCustomPrompt] = useState('');
 
     const isEditing = !!initialData.id;
     const isAdmin = role === 'admin';
 
-    const handleAiAction = useCallback(async (action, customPrompt = '') => {
+    const handleAiAction = useCallback(async (action, promptOverride = '') => {
         setIsAiLoading(true);
         toast({ title: '🤖 IA en progreso...', description: 'El asistente de IA está trabajando en tu solicitud.' });
 
         const editor = editorRef.current;
-        if (!editor) {
+        if (!editor && action !== 'generate-title' && action !== 'generate-meta-title' && action !== 'generate-meta-description' && action !== 'generate-keywords' && action !== 'generate-excerpt') {
+            toast({ title: '❌ Editor no listo', description: 'El editor de texto no está disponible.', variant: 'destructive' });
             setIsAiLoading(false);
             return;
         }
 
-        const { from, to } = editor.state.selection;
-        const selectedText = editor.state.doc.textBetween(from, to, ' ');
-        const fullContent = editor.state.doc.textContent;
+        const { from, to } = editor ? editor.state.selection : { from: 0, to: 0 };
+        const selectedText = editor ? editor.state.doc.textBetween(from, to, ' ') : '';
+        const fullContent = editor ? editor.getHTML() : '';
 
         let prompt;
         let targetField = 'content';
 
         switch (action) {
-            case 'generate-content':
-                prompt = `Basado en el título "${title}", genera el contenido principal para un artículo de blog.`;
+            case 'generate-title':
+                prompt = `Mejora este título para un blog, hazlo más atractivo y optimizado para SEO: "${title}"`;
+                targetField = 'title';
                 break;
             case 'improve-writing':
                 prompt = `Mejora la redacción del siguiente texto: "${selectedText || fullContent}"`;
@@ -102,11 +107,11 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
                 targetField = 'keywords';
                 break;
             case 'generate-excerpt':
-                prompt = `Genera un resumen o extracto (excerpt) atractivo y conciso para un artículo con el siguiente contenido: "${fullContent}"`;
+                prompt = `Genera un resumen o extracto (excerpt) atractivo y conciso de blogger profesional para un artículo con el siguiente contenido: "${fullContent}"`;
                 targetField = 'excerpt';
                 break;
             case 'custom':
-                prompt = customPrompt;
+                prompt = promptOverride;
                 break;
             default:
                 setIsAiLoading(false);
@@ -115,24 +120,27 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
 
         try {
             const { data, error } = await supabase.functions.invoke('ai-assistant', {
-            body: JSON.stringify({ prompt }),
-        });
+              body: JSON.stringify({ prompt }),
+            });
 
             if (error) throw error;
             if (data.error) throw new Error(data.error)
 
             const aiResponse = data.response;
 
-            if (targetField === 'content') {
+            if (targetField === 'content' && editor) {
+                 const newContent = `<mark>${aiResponse}</mark>`;
                 if (selectedText) {
-                    editor.chain().focus().deleteRange({ from, to }).insertContent(aiResponse).run();
+                    editor.chain().focus().deleteRange({ from, to }).insertContent(newContent).run();
                 } else {
-                    editor.chain().focus().setContent(aiResponse, { emitUpdate: true }).run();
+                    editor.chain().focus().insertContentAt(editor.state.selection.from, newContent).run();
                 }
+            } else if (targetField === 'title') {
+                setTitle(aiResponse.replace(/["']/g, ''));
             } else if (targetField === 'metaTitle') {
-                setMetaTitle(aiResponse.replace(/["']/g, '')); // Limpiar comillas
+                setMetaTitle(aiResponse.replace(/["']/g, ''));
             } else if (targetField === 'metaDescription') {
-                setMetaDescription(aiResponse.replace(/["']/g, '')); // Limpiar comillas
+                setMetaDescription(aiResponse.replace(/["']/g, ''));
             } else if (targetField === 'keywords') {
                 setKeywords(aiResponse.split(',').map(k => k.trim()).filter(Boolean));
             } else if (targetField === 'excerpt') {
@@ -148,8 +156,16 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
             console.error('AI Assistant Error:', error);
         } finally {
             setIsAiLoading(false);
+            if (action === 'custom') {
+              setIsAiPromptOpen(false);
+              setCustomPrompt('');
+            }
         }
     }, [toast, title]);
+    
+    const handleGenerateContentClick = () => {
+        setIsAiPromptOpen(true);
+    };
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -347,6 +363,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
                             availableCategories={availableCategories}
                             postSubcategory={postSubcategoryId}
                             setPostSubcategory={setPostSubcategoryId}
+                            availableSubcategories={availableSubcategories}
                             excerpt={excerpt}
                             setExcerpt={setExcerpt}
                             onAiAction={handleAiAction}
@@ -356,6 +373,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
                             content={content}
                             onChange={setContent}
                             onAiAction={handleAiAction}
+                            onGenerateContent={handleGenerateContentClick}
                             getEditor={(editor) => { editorRef.current = editor; }}
                         />
                     </div>
@@ -422,9 +440,34 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {} }) => {
                     )}
                 </div>
             </form>
+             <Dialog open={isAiPromptOpen} onOpenChange={setIsAiPromptOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Generar Contenido con IA</DialogTitle>
+                        <DialogDescription>
+                            Escribe una instrucción clara para la IA. Por ejemplo: "Crea una introducción sobre los verbos irregulares en inglés".
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-2">
+                        <Label htmlFor="custom-prompt">Tu Prompt:</Label>
+                        <Textarea
+                            id="custom-prompt"
+                            value={customPrompt}
+                            onChange={(e) => setCustomPrompt(e.target.value)}
+                            placeholder="Ej: Escribe 3 párrafos sobre la importancia de la lectura..."
+                            className="bg-black/30 border-white/20 min-h-[120px]"
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsAiPromptOpen(false)}>Cancelar</Button>
+                        <Button onClick={() => handleAiAction('custom', customPrompt)} disabled={isAiLoading || !customPrompt}>
+                            {isAiLoading ? 'Generando...' : 'Generar'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </motion.div>
     );
 };
 
 export default PostForm;
-  

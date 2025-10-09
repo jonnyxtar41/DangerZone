@@ -18,7 +18,25 @@ const PostFormInputs = ({
         <div className="space-y-6">
             <div>
                 <Label htmlFor="title">Título del Recurso</Label>
-                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej: Guía Completa de Tiempos Verbales" className="mt-2 bg-black/30 border-white/20" />
+                <div className="relative mt-2">
+                    <Input 
+                        id="title" 
+                        value={title} 
+                        onChange={(e) => setTitle(e.target.value)} 
+                        placeholder="Ej: Guía Completa de Tiempos Verbales" 
+                        className="bg-black/30 border-white/20 pr-10" 
+                    />
+                    <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                        onClick={() => onAiAction('generate-title')}
+                        disabled={isAiLoading || !title}
+                    >
+                        <Sparkles className="w-4 h-4 text-yellow-400" />
+                    </Button>
+                </div>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
                 <div>
@@ -76,3 +94,4 @@ const PostFormInputs = ({
 };
 
 export default PostFormInputs;
+  

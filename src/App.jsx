@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
@@ -14,6 +13,8 @@ import { getSections } from '@/lib/supabase/sections';
 import { Helmet } from 'react-helmet';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Home from '@/pages/Home';
+import CookieConsent from '@/components/CookieConsent';
+import PushNotificationManager from '@/components/PushNotificationManager';
 
 const Recursos = lazy(() => import('@/pages/Recursos'));
 const Post = lazy(() => import('@/pages/Post'));
@@ -100,6 +101,8 @@ function App() {
 
                   <Route path="/*" element={
                     <Layout sections={sections} siteContent={siteContent}>
+                      <PushNotificationManager frequencyDays={siteContent.notification_prompt_frequency_days} />
+                      <CookieConsent />
                       <Routes>
                         <Route path="/" element={<Home />} />
                         {sections.map(section => (
@@ -127,4 +130,3 @@ function App() {
 }
 
 export default App;
-  

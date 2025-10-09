@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, FileText, Hash, Folder, Users, PlusSquare, Edit, BarChart, DollarSign, MessageSquare, BookOpen } from 'lucide-react';
+import { ArrowRight, FileText, Hash, Folder, Users, PlusSquare, Edit, BarChart, DollarSign, MessageSquare, BookOpen, Globe } from 'lucide-react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -16,13 +16,29 @@ const StatCard = ({ title, value, icon, color }) => (
     </div>
 );
 
-const QuickAccessCard = ({ title, to, icon }) => (
-    <Link to={to} className="glass-effect p-4 md:p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors duration-300">
-        {React.createElement(icon, { className: "w-8 h-8 md:w-10 md:h-10 mb-3 text-primary" })}
-        <span className="font-semibold text-gray-200 text-sm md:text-base">{title}</span>
-        <ArrowRight className="w-4 h-4 mt-2 text-muted-foreground" />
-    </Link>
-);
+const QuickAccessCard = ({ title, to, icon, isExternal = false }) => {
+    const commonProps = {
+        className: "glass-effect p-4 md:p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors duration-300",
+    };
+
+    if (isExternal) {
+        return (
+            <a href={to} target="_blank" rel="noopener noreferrer" {...commonProps}>
+                {React.createElement(icon, { className: "w-8 h-8 md:w-10 md:h-10 mb-3 text-primary" })}
+                <span className="font-semibold text-gray-200 text-sm md:text-base">{title}</span>
+                <ArrowRight className="w-4 h-4 mt-2 text-muted-foreground" />
+            </a>
+        );
+    }
+
+    return (
+        <Link to={to} {...commonProps}>
+            {React.createElement(icon, { className: "w-8 h-8 md:w-10 md:h-10 mb-3 text-primary" })}
+            <span className="font-semibold text-gray-200 text-sm md:text-base">{title}</span>
+            <ArrowRight className="w-4 h-4 mt-2 text-muted-foreground" />
+        </Link>
+    );
+};
 
 const RecentItem = ({ item, type }) => {
     const isPost = type === 'post';
@@ -81,8 +97,8 @@ const Dashboard = ({ user, posts, categories, sections }) => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                     <QuickAccessCard title="Añadir Recurso" to="../add-resource" icon={PlusSquare} />
                     <QuickAccessCard title="Gestionar Contenido" to="../manage-content" icon={Edit} />
+                    <QuickAccessCard title="Ver Sitio Web" to="/" icon={Globe} isExternal={true} />
                     <QuickAccessCard title="Ver Estadísticas" to="../analytics" icon={BarChart} />
-                    <QuickAccessCard title="Gestionar Pagos" to="../payments" icon={DollarSign} />
                 </div>
             </div>
 
