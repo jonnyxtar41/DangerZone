@@ -66,8 +66,8 @@ const InterstitialAd = () => {
               showCloseButton={false} 
               className={cn(
                 "bg-gray-800 border-2 border-yellow-400 text-center",
-                "sm:p-8 p-4", // Responsive padding
-                "w-[95vw] sm:w-full sm:max-w-2xl" // Responsive width
+                "p-4 sm:p-8",
+                "w-[95vw] sm:max-w-lg" // Ancho responsivo
               )}
             >
                 <DialogHeader>
@@ -93,8 +93,7 @@ const InterstitialAd = () => {
                         <div
                             className="w-full bg-gray-700 border-2 border-dashed border-gray-500 rounded-lg flex items-center justify-center"
                             style={{ 
-                                width: adConfig?.width ? `${adConfig.width}px` : '100%', 
-                                maxWidth: '100%',
+                                maxWidth: adConfig?.width ? `${adConfig.width}px` : '100%', 
                                 height: adConfig?.height ? `${adConfig.height}px` : '256px', 
                                 margin: '0 auto' 
                             }}

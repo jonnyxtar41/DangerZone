@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/customSupabaseClient';
 import { logActivity } from '@/lib/supabase/log';
 
@@ -127,7 +128,7 @@ export const addPostEdit = async (editData) => {
 export const getPendingEdits = async () => {
     const { data, error } = await supabase
         .from('post_edits')
-        .select(`*, posts (title, slug), editor:editor_id (email)`)
+        .select(`*, posts (title, slug), editor: editor_id (email)`)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
     
@@ -238,3 +239,42 @@ export const getDownloadablePosts = async (count) => {
 
   return data;
 };
+
+export const getRelatedPosts = async (postId, keywords, limit = 3) => {
+    if (!keywords || keywords.length === 0) {
+        return [];
+    }
+
+    const { data, error } = await supabase
+        .from('posts')
+        .select('*, categories(name, gradient), sections(slug)')
+        .eq('status', 'published')
+        .neq('id', postId)
+        .overlaps('keywords', keywords)
+        .limit(limit);
+
+    if (error) {
+        console.error('Error fetching related posts:', error);
+        return [];
+    }
+    
+    return data;
+};
+
+export const getFeaturedPosts = async (options = {}) => {
+    const { limit = 6 } = options;
+    const { data, error } = await supabase
+        .from('posts')
+        .select('*, categories(name, gradient), sections(slug)')
+        .eq('status', 'published')
+        .eq('is_featured', true)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+    if (error) {
+        console.error('Error fetching featured posts:', error);
+        return [];
+    }
+    return data;
+};
+  

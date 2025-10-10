@@ -1,147 +1,271 @@
-import React from 'react';
+import { supabase } from '@/lib/customSupabaseClient';
+import { logActivity } from '@/lib/supabase/log';
 
-const initialPosts = [
-    {
-      id: 1,
-      title: '10 Consejos para Hablar Inglés con Confianza',
-      author: 'Jane Doe',
-      date: '15 Ago, 2025',
-      category: 'Consejos',
-      image_description: 'Portada de libro con el título: Habla Inglés con Confianza',
-      gradient: 'from-blue-500 to-teal-500',
-      excerpt: 'Descubre técnicas probadas para mejorar tu fluidez y perder el miedo a hablar en público.',
-      content: '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p><p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p><h2>Subtítulo de Ejemplo</h2><p>Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris.</p>',
-      download: null,
-      mainImage: null,
-      metaTitle: '10 Consejos para Hablar Inglés con Confianza',
-      metaDescription: 'Descubre técnicas probadas para mejorar tu fluidez y perder el miedo a hablar en público.',
-      slug: '10-consejos-hablar-ingles-confianza'
-    },
-    {
-      id: 2,
-      title: 'Los Errores Más Comunes al Aprender Gramática',
-      author: 'John Smith',
-      date: '10 Ago, 2025',
-      category: 'Gramática',
-      image_description: 'Portada de libro de gramática inglesa con errores comunes resaltados',
-      gradient: 'from-purple-500 to-pink-500',
-      excerpt: 'Evita los errores gramaticales más frecuentes que cometen los estudiantes de inglés.',
-      content: '<p>Este es el contenido detallado sobre los errores más comunes en gramática. Aprenderás a identificar y corregir errores que muchos estudiantes cometen. ¡Mejora tu escritura y habla con estos consejos!</p>',
-      download: null,
-      mainImage: null,
-      metaTitle: 'Errores Comunes al Aprender Gramática Inglesa',
-      metaDescription: 'Evita los errores gramaticales más frecuentes que cometen los estudiantes de inglés.',
-      slug: 'errores-comunes-aprender-gramatica'
-    },
-    {
-      id: 3,
-      title: 'Cómo Usar Phrasal Verbs Correctamente',
-      author: 'Emily White',
-      date: '05 Ago, 2025',
-      category: 'IELTS',
-      image_description: 'Guía ilustrada de phrasal verbs en la portada de un libro',
-      gradient: 'from-green-500 to-lime-500',
-      excerpt: 'Una guía completa para entender y utilizar los phrasal verbs más importantes en inglés.',
-      content: '<p>Los phrasal verbs pueden ser complicados, pero con esta guía, dominarás su uso. Exploraremos los más comunes con ejemplos prácticos y ejercicios para que puedas integrarlos en tu vocabulario diario.</p>',
-      download: { type: 'url', url: 'https://example.com/download/phrasal-verbs-guide.pdf' },
-      mainImage: null,
-      metaTitle: 'Guía Completa de Phrasal Verbs en Inglés',
-      metaDescription: 'Una guía completa para entender y utilizar los phrasal verbs más importantes en inglés.',
-      slug: 'como-usar-phrasal-verbs-correctamente'
-    },
-    {
-      id: 4,
-      title: 'Guía Definitiva de Tiempos Verbales para TOEIC',
-      author: 'Carlos Ruiz',
-      date: '28 Ago, 2025',
-      category: 'TOEIC',
-      excerpt: 'Domina todos los tiempos verbales en inglés con esta guía completa y fácil de entender. Incluye ejemplos y ejercicios prácticos.',
-      image_description: 'Infografía de los tiempos verbales en inglés',
-      gradient: 'from-red-500 to-orange-500',
-      content: '<p>Desde el presente simple hasta el futuro perfecto continuo, esta guía desglosa cada tiempo verbal. Con explicaciones claras y muchos ejemplos, los tiempos verbales ya no serán un misterio para ti.</p>',
-      download: null,
-      mainImage: null,
-      metaTitle: 'Guía Definitiva de Tiempos Verbales para TOEIC',
-      metaDescription: 'Domina todos los tiempos verbales en inglés con esta guía completa y fácil de entender.',
-      slug: 'guia-definitiva-tiempos-verbales-toeic'
-    },
-    {
-      id: 5,
-      title: '25 Expresiones Idiomáticas Esenciales para TOEFL',
-      author: 'Sofia Chen',
-      date: '25 Ago, 2025',
-      category: 'TOEFL',
-      excerpt: 'Aprende y utiliza 25 expresiones idiomáticas que te harán sonar como un hablante nativo. ¡Sorprende en tu próxima conversación!',
-      image_description: 'Ilustraciones coloridas de expresiones idiomáticas',
-      gradient: 'from-yellow-500 to-amber-500',
-      content: '<p>Sumérgete en la cultura inglesa con estas 25 expresiones idiomáticas. Te explicamos qué significan, cómo y cuándo usarlas para que suenes más natural y fluido.</p>',
-      download: null,
-      mainImage: null,
-      metaTitle: '25 Expresiones Idiomáticas Esenciales para TOEFL',
-      metaDescription: 'Aprende y utiliza 25 expresiones idiomáticas que te harán sonar como un hablante nativo.',
-      slug: '25-expresiones-idiomaticas-esenciales-toefl'
-    },
-    {
-      id: 6,
-      title: 'Análisis de "The Great Gatsby"',
-      author: 'David Miller',
-      date: '22 Ago, 2025',
-      category: 'FICTION',
-      excerpt: 'Un profundo análisis literario de la obra maestra de F. Scott Fitzgerald, "The Great Gatsby".',
-      image_description: 'Persona en una entrevista de trabajo sonriendo con confianza',
-      gradient: 'from-cyan-500 to-blue-500',
-      content: '<p>Una entrevista de trabajo en inglés puede ser intimidante, pero con la preparación adecuada, puedes brillar. Aquí tienes todo lo que necesitas saber, desde cómo presentarte hasta cómo responder las preguntas más difíciles.</p>',
-      download: { type: 'url', url: 'https://example.com/download/interview-prep.pdf' },
-      mainImage: null,
-      metaTitle: 'Análisis Literario de "The Great Gatsby"',
-      metaDescription: 'Un profundo análisis literario de la obra maestra de F. Scott Fitzgerald, "The Great Gatsby".',
-      slug: 'analisis-the-great-gatsby'
-    },
-];
 
-const POSTS_KEY = 'vortex-posts';
+export const getPosts = async (options = {}) => {
+    const {
+        section,
+        categoryName,
+        subcategoryName,
+        page = 1,
+        limit = 9,
+        searchQuery,
+        includeDrafts = false,
+        includePending = false,
+        includeScheduled = false,
+        userId
+    } = options;
 
-const initializePosts = () => {
-    const postsFromStorage = localStorage.getItem(POSTS_KEY);
-    if (!postsFromStorage) {
-        localStorage.setItem(POSTS_KEY, JSON.stringify(initialPosts));
+    let query = supabase
+        .from('posts')
+        .select(`
+            id, created_at, title, author, category_id, subcategory_id,
+            excerpt, date, image_description, main_image_url, slug,
+            show_author, custom_author_name, show_date, status, user_id,
+            section_id, is_premium, price, currency, download, published_at,
+            is_discount_active, discount_percentage, comments_enabled, custom_fields, is_featured,
+            sections!inner(id, name, slug),
+            categories!left(id, name, gradient, section_id),
+            subcategories (id, name)
+        `, { count: 'exact' });
+
+    const statuses = ['published'];
+    if (includeDrafts) statuses.push('draft');
+    if (includePending) statuses.push('pending_approval');
+    if (includeScheduled) statuses.push('scheduled');
+    
+    if (!includeScheduled) {
+        query = query.or(`status.neq.scheduled,and(status.eq.scheduled,published_at.lte.now())`);
     }
+
+    query = query.in('status', statuses);
+    
+    if (section) query = query.eq('sections.slug', section);
+    if (categoryName) query = query.eq('categories.name', categoryName);
+    if (subcategoryName) query = query.eq('subcategories.name', subcategoryName);
+    if (searchQuery) query = query.or(`title.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%`);
+    if (userId) query = query.eq('user_id', userId);
+
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    query = query.range(from, to);
+
+    query = query.order('created_at', { ascending: false });
+
+    const { data, error, count } = await query;
+
+    if (error) {
+        console.error('Error fetching posts:', error);
+        return { data: [], count: 0 };
+    }
+    
+    return { data, count };
 };
 
-initializePosts();
 
-export const getPosts = () => {
-    try {
-        const postsFromStorage = localStorage.getItem(POSTS_KEY);
-        return postsFromStorage ? JSON.parse(postsFromStorage) : [];
-    } catch (error) {
-        console.error("Error parsing posts from localStorage", error);
+export const getFeaturedPosts = async (options = {}) => {
+    const { limit, withImage } = options;
+    let query = supabase
+        .from('posts')
+        .select('*, categories(name, gradient), sections(slug)')
+        .eq('status', 'published')
+        .eq('is_featured', true)
+        .order('created_at', { ascending: false });
+
+    if (limit) {
+        query = query.limit(limit);
+    }
+    
+    if (withImage) {
+        query = query.not('main_image_url', 'is', null).neq('main_image_url', '');
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        console.error('Error fetching featured posts:', error);
         return [];
     }
+
+    return data;
+}
+
+
+
+export const getPostBySlug = async (slug) => {
+    const { data, error } = await supabase
+        .from('posts')
+        .select(`
+            *,
+            sections (name, slug),
+            categories (name, gradient, section_id),
+            subcategories (name)
+        `)
+        .eq('slug', slug)
+        .or(`status.eq.published,and(status.eq.scheduled,published_at.lte.now()),status.eq.draft,status.eq.pending_approval`)
+        .limit(1)
+        .maybeSingle();
+
+    if (error) {
+        console.error('Error fetching post by slug:', error);
+        return null;
+    }
+    
+    return data;
 };
 
-export const getPostById = (id) => {
-    const posts = getPosts();
-    return posts.find(p => p.id.toString() === id.toString());
+export const addPost = async (postData) => {
+    const { data, error } = await supabase
+        .from('posts')
+        .insert([postData])
+        .select();
+    
+    if (!error && data && data.length > 0) {
+        logActivity(`Usuario creó un nuevo recurso: "${postData.title}"`, { status: postData.status, postId: data[0].id });
+    } else if(error) {
+        console.error('Error adding post:', error);
+    }
+
+    return { data, error };
 };
 
-export const addPost = (post) => {
-    const posts = getPosts();
-    const updatedPosts = [post, ...posts];
-    localStorage.setItem(POSTS_KEY, JSON.stringify(updatedPosts));
+export const updatePost = async (postId, postData) => {
+    const { data, error } = await supabase
+        .from('posts')
+        .update(postData)
+        .eq('id', postId)
+        .select();
+
+    if (!error) {
+        logActivity(`Usuario actualizó el recurso: "${postData.title}"`, { postId, changes: Object.keys(postData) });
+    }
+
+    return { data, error };
 };
 
-export const updatePost = (updatedPost) => {
-    const posts = getPosts();
-    const postIndex = posts.findIndex(p => p.id === updatedPost.id);
-    if (postIndex !== -1) {
-        posts[postIndex] = updatedPost;
-        localStorage.setItem(POSTS_KEY, JSON.stringify(posts));
+export const addPostEdit = async (editData) => {
+    const { data, error } = await supabase
+        .from('post_edits')
+        .insert([editData])
+        .select();
+    
+    if (!error) {
+        logActivity(`Co-admin propuso una edición para el post ID: ${editData.post_id}`);
+    }
+    return { data, error };
+};
+
+export const getPendingEdits = async () => {
+    const { data, error } = await supabase
+        .from('post_edits')
+        .select(`*, posts (title, slug), editor:editor_id (email)`)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+    
+    if (error) {
+        console.error('Error fetching pending edits:', error);
+        return [];
+    }
+
+    return data || [];
+};
+
+export const updatePostEditStatus = async (editId, status, reviewerId) => {
+    const { data, error } = await supabase
+        .from('post_edits')
+        .update({ status, reviewed_at: new Date(), reviewer_id: reviewerId })
+        .eq('id', editId)
+        .select()
+        .single();
+
+    if (!error) {
+        logActivity(`Admin ${status === 'approved' ? 'aprobó' : 'rechazó'} una edición`, { editId });
+    }
+    return { data, error };
+};
+
+export const getRandomPosts = async (count) => {
+  const { data: posts, error } = await supabase
+    .from('posts')
+    .select('*, categories(name, gradient)')
+    .eq('status', 'published');
+
+  if (error) {
+    console.error('Error fetching random posts:', error);
+    return [];
+  }
+
+  const shuffled = posts.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
+
+export const getRandomPostsWithImages = async (count) => {
+  const { data: posts, error } = await supabase
+    .from('posts')
+      .select('*, categories(name, gradient), sections(slug)')
+    .eq('status', 'published')
+    .not('main_image_url', 'is', null)
+    .neq('main_image_url', '');
+
+  if (error) {
+    console.error('Error fetching random posts with images:', error);
+    return [];
+  }
+
+  const shuffled = posts.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
+
+export const deletePost = async (postId, postTitle, shouldLog = true) => {
+    const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId);
+
+    if (!error && shouldLog) {
+        logActivity(`Usuario eliminó el recurso: "${postTitle}"`, { postId });
+    }
+
+    return { error };
+};
+
+export const incrementPostStat = async (postId, statType) => {
+    if (!postId || !statType) return;
+    const { error } = await supabase.rpc('increment_post_stat', { 
+        post_id_to_update: postId, 
+        stat_to_increment: statType 
+    });
+    if (error) {
+        console.error(`Error incrementing ${statType} for post ${postId}:`, error);
     }
 };
 
-export const deletePost = (postId) => {
-    let posts = getPosts();
-    posts = posts.filter(p => p.id !== postId);
-    localStorage.setItem(POSTS_KEY, JSON.stringify(posts));
+export const getAllPostStats = async () => {
+    const { data, error } = await supabase
+        .from('post_stats')
+        .select('*');
+    
+    if (error) {
+        console.error('Error fetching all post stats:', error);
+        return [];
+    }
+
+    return data;
+};
+
+export const getDownloadablePosts = async (count) => {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*, categories(name, gradient), sections(slug)')
+    .eq('status', 'published')
+    .not('download', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(count);
+
+  if (error) {
+    console.error('Error fetching downloadable posts:', error);
+    return [];
+  }
+
+  return data;
 };

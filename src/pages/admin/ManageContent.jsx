@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -236,4 +235,3 @@ const ManageContent = ({ posts, categories, sections, onUpdate }) => {
 };
 
 export default ManageContent;
-  

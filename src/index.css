@@ -1,5 +1,4 @@
-
-    @tailwind base;
+@tailwind base;
     @tailwind components;
     @tailwind utilities;
 
@@ -175,15 +174,15 @@
     }
 
     .glass-effect {
-      background-color: rgba(28, 28, 40, 0.5);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
-
+    
     .glass-effect-aside {
-      background-color: rgba(10, 10, 20, 0.8);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: rgba(241, 241, 243, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .admin-sidebar {
@@ -270,4 +269,3 @@
     .ProseMirror td .resizable-image-wrapper[data-align="right"] {
       justify-content: flex-end;
     }
-  

@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { Star, Users, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-const Hero = () => {
+
+const Hero = ({ heroImageUrl }) => {
   return <section className="pt-32 pb-20 px-6">
       <div className="container mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -72,7 +73,7 @@ const Hero = () => {
           delay: 0.2
         }} className="relative">
             <div className="floating-animation">
-              <img className="w-full h-auto rounded-2xl shadow-2xl" alt="Universo de conocimiento y curiosidad" src="https://horizons-cdn.hostinger.com/302fe7ec-cb94-4acf-acab-5d00c5484121/photo-1699373019849-3dc9158f7819-VOlzM.webp" />
+              <img className="w-full h-auto rounded-2xl shadow-2xl" alt="Universo de conocimiento y curiosidad" src={heroImageUrl || "https://horizons-cdn.hostinger.com/302fe7ec-cb94-4acf-acab-5d00c5484121/photo-1699373019849-3dc9158f7819-VOlzM.webp"} />
             </div>
             
             {/* Floating Cards */}

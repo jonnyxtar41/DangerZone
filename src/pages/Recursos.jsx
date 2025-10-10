@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { Calendar, User, Search, FileDown  } from 'lucide-react';
@@ -9,6 +9,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { getPosts } from '@/lib/supabase/posts';
 import AdLink from '@/components/AdLink';
 import AdBlock from '@/components/AdBlock';
+import Pagination from '@/components/Pagination';
 
 const POSTS_PER_PAGE = 9;
 
@@ -36,30 +37,28 @@ const sectionConfig = {
 const Recursos = ({ section }) => {
     const { toast } = useToast();
     const [posts, setPosts] = useState([]);
-    const [page, setPage] = useState(1);
     const [totalPosts, setTotalPosts] = useState(0);
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchParams, setSearchParams] = useSearchParams();
     const categoryFilter = searchParams.get('categoria');
     const subcategoryFilter = searchParams.get('subcategoria');
+    const page = parseInt(searchParams.get('page') || '1', 10);
     const config = useMemo(() => sectionConfig[section] || sectionConfig['blog'], [section]);
 
-    const fetchPosts = useCallback(async (isNewSearch) => {
+    const fetchPosts = useCallback(async () => {
         setLoading(true);
-        const currentPage = isNewSearch ? 1 : page;
-        
         const { data, count } = await getPosts({
             section,
             categoryName: categoryFilter,
             subcategoryName: subcategoryFilter,
             searchQuery,
-            page: currentPage,
+            page: page,
             limit: POSTS_PER_PAGE,
         });
 
         if (data) {
-            setPosts(prevPosts => isNewSearch ? data : [...prevPosts, ...data]);
+            setPosts(data);
             setTotalPosts(count);
         } else {
             toast({
@@ -73,31 +72,25 @@ const Recursos = ({ section }) => {
     }, [categoryFilter, subcategoryFilter, searchQuery, page, toast, section, config.plural]);
 
     useEffect(() => {
-        fetchPosts(true);
-        setPage(1); 
-    }, [categoryFilter, subcategoryFilter, searchQuery, section]);
+        fetchPosts();
+        window.scrollTo(0, 0);
+    }, [fetchPosts, page]);
 
-
-    useEffect(() => {
-        if (page > 1) {
-            fetchPosts(false);
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page]);
-    
     const handleSearchChange = (e) => {
-        setSearchQuery(e.target.value);
-        const newParams = new URLSearchParams(searchParams);
-        if (e.target.value) {
-            newParams.delete('categoria');
-            newParams.delete('subcategoria');
+        const query = e.target.value;
+        setSearchQuery(query);
+        const newParams = new URLSearchParams();
+        if (query) {
+            newParams.set('q', query);
         }
         setSearchParams(newParams);
-    }
-
-    const handleLoadMore = () => {
-        setPage(prevPage => prevPage + 1);
-    }
+    };
+    
+    const handlePageChange = (newPage) => {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('page', newPage);
+        setSearchParams(newParams);
+    };
     
     let pageTitle;
     let pageDescription;
@@ -113,8 +106,7 @@ const Recursos = ({ section }) => {
         pageDescription = config.description;
     }
 
-
-    const hasMorePosts = posts.length < totalPosts;
+    const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
 
     return (
         <>
@@ -209,7 +201,7 @@ const Recursos = ({ section }) => {
                             ))}
                         </div>
                         
-                        {(loading && page === 1) && (
+                        {loading && (
                             <div className="text-center text-muted-foreground mt-16">Cargando {config.plural.toLowerCase()}...</div>
                         )}
                         
@@ -224,22 +216,11 @@ const Recursos = ({ section }) => {
                             </motion.div>
                         )}
                         
-                        {hasMorePosts && (
-                            <motion.div 
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.5 }}
-                                viewport={{ once: true }}
-                                className="text-center mt-16">
-                                <Button
-                                    onClick={handleLoadMore}
-                                    disabled={loading}
-                                    className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full text-base font-semibold"
-                                >
-                                    {loading ? 'Cargando...' : `Cargar más ${config.plural.toLowerCase()}`}
-                                </Button>
-                            </motion.div>
-                        )}
+                       <Pagination
+                            currentPage={page}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                        />
                     </div>
                 </section>
             </main>

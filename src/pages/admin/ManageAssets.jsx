@@ -1,9 +1,8 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Upload, Trash2, Copy, Search } from 'lucide-react';
+import { Upload, Trash2, Copy, Search, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { listSiteAssets, deleteSiteAsset, uploadSiteAsset } from '@/lib/supabase/assets';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -14,6 +13,8 @@ const ManageAssets = () => {
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [replacingAssetName, setReplacingAssetName] = useState(null);
+    const fileInputRef = useRef(null);
 
     const fetchAssets = useCallback(async () => {
         setLoading(true);
@@ -21,7 +22,12 @@ const ManageAssets = () => {
         if (error) {
             toast({ title: 'Error al cargar archivos', description: error.message, variant: 'destructive' });
         } else {
-            setAssets(data || []);
+            // Add a cache-busting query parameter to the URL for previews
+            const assetsWithCacheBust = data.map(asset => ({
+                ...asset,
+                previewUrl: `${getAssetUrl(asset.name)}?t=${new Date(asset.updated_at).getTime()}`
+            }));
+            setAssets(assetsWithCacheBust || []);
         }
         setLoading(false);
     }, [toast]);
@@ -35,7 +41,7 @@ const ManageAssets = () => {
         if (!file) return;
 
         setUploading(true);
-        const filePath = `${Date.now()}-${file.name}`;
+        const filePath = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
         const url = await uploadSiteAsset(file, filePath);
 
         if (url) {
@@ -46,6 +52,29 @@ const ManageAssets = () => {
         }
         setUploading(false);
         event.target.value = '';
+    };
+
+    const handleReplaceClick = (assetName) => {
+        setReplacingAssetName(assetName);
+        fileInputRef.current.click();
+    };
+
+    const handleFileReplace = async (event) => {
+        const file = event.target.files[0];
+        if (!file || !replacingAssetName) return;
+
+        setUploading(true);
+        const url = await uploadSiteAsset(file, replacingAssetName);
+
+        if (url) {
+            toast({ title: 'Archivo reemplazado', description: 'El archivo se ha actualizado. Puede que necesites refrescar la página (CTRL+F5) para ver los cambios.' });
+            fetchAssets();
+        } else {
+            toast({ title: 'Error al reemplazar', description: 'No se pudo subir el nuevo archivo.', variant: 'destructive' });
+        }
+        setUploading(false);
+        setReplacingAssetName(null);
+        event.target.value = ''; // Reset file input
     };
 
     const handleDelete = async (assetName) => {
@@ -83,7 +112,7 @@ const ManageAssets = () => {
                 <h2 className="text-3xl font-bold">Gestionar Archivos</h2>
                 <Button asChild className="cursor-pointer">
                     <label htmlFor="asset-upload">
-                        <Upload className="mr-2 h-4 w-4" /> {uploading ? 'Subiendo...' : 'Subir Archivo'}
+                        <Upload className="mr-2 h-4 w-4" /> {uploading && !replacingAssetName ? 'Subiendo...' : 'Subir Archivo'}
                     </label>
                 </Button>
                 <Input
@@ -91,6 +120,13 @@ const ManageAssets = () => {
                     type="file"
                     className="hidden"
                     onChange={handleFileUpload}
+                    disabled={uploading}
+                />
+                <Input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileReplace}
                     disabled={uploading}
                 />
             </div>
@@ -122,10 +158,10 @@ const ManageAssets = () => {
                                 <div className="h-40 bg-background/50 flex items-center justify-center p-2">
                                     {asset.metadata && asset.metadata.mimetype && asset.metadata.mimetype.startsWith('image/') ? (
                                         <img
-                                            src={getAssetUrl(asset.name)}
+                                            src={asset.previewUrl}
                                             alt={asset.name}
                                             className="max-h-full max-w-full object-contain"
-                                         />
+                                        />
                                     ) : (
                                         <p className="text-center text-sm text-gray-400 break-all p-2">{asset.name}</p>
                                     )}
@@ -136,6 +172,9 @@ const ManageAssets = () => {
                                     <div className="flex gap-2 mt-4">
                                         <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => copyToClipboard(getAssetUrl(asset.name))}>
                                             <Copy className="w-4 h-4" />
+                                        </Button>
+                                        <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => handleReplaceClick(asset.name)} disabled={uploading}>
+                                            <RefreshCw className={`w-4 h-4 ${uploading && replacingAssetName === asset.name ? 'animate-spin' : ''}`} />
                                         </Button>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>

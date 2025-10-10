@@ -32,7 +32,7 @@ const RecentPosts = ({ posts = [] }) => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            Últimos <span className="gradient-text">Recursos</span>
+            Lo Más <span className="gradient-text">Destacado</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Explora nuestras entradas más recientes y mantente al día con los mejores materiales de aprendizaje.

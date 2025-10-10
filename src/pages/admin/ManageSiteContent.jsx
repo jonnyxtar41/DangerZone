@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, FileText, PlusCircle, Trash2, Upload, Bell } from 'lucide-react';
+import { Save, FileText, PlusCircle, Trash2, Upload, Bell, Image as ImageIcon, Search } from 'lucide-react';
 import { getAllSiteContent, updateSiteContent } from '@/lib/supabase/siteContent';
 import { uploadSiteAsset } from '@/lib/supabase/assets';
 import { getSections, addSection, updateSection, deleteSection } from '@/lib/supabase/sections';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { allIcons } from '@/lib/icons.js';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import TiptapEditor from '@/components/TiptapEditor';
 
 const ManageSiteContent = ({ onUpdate }) => {
@@ -23,6 +23,8 @@ const ManageSiteContent = ({ onUpdate }) => {
     const [editingSection, setEditingSection] = useState(null);
     const [iconImageFile, setIconImageFile] = useState(null);
     const [iconImagePreview, setIconImagePreview] = useState('');
+    const [isIconSelectorOpen, setIsIconSelectorOpen] = useState(false);
+    const [iconSearchTerm, setIconSearchTerm] = useState('');
 
     const fetchAllData = async () => {
         setLoading(true);
@@ -157,10 +159,18 @@ const ManageSiteContent = ({ onUpdate }) => {
         setIconImageFile(null);
         setIconImagePreview('');
     };
+    
+    const filteredIcons = useMemo(() => {
+        return Object.entries(allIcons).filter(([name]) => 
+            name.toLowerCase().includes(iconSearchTerm.toLowerCase())
+        );
+    }, [iconSearchTerm]);
 
     if (loading && Object.keys(content).length === 0) {
         return <p>Cargando contenido del sitio...</p>;
     }
+
+    const SelectedIcon = editingSection?.icon ? allIcons[editingSection.icon] : null;
 
     return (
         <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
@@ -175,6 +185,33 @@ const ManageSiteContent = ({ onUpdate }) => {
             </div>
 
             <div className="space-y-8">
+                 <div className="glass-effect p-6 rounded-2xl">
+                    <h3 className="text-xl font-semibold mb-4">Imágenes Globales</h3>
+                    <div className="space-y-6">
+                        <div className="grid md:grid-cols-[1fr_auto] items-center gap-4">
+                            <div>
+                                <Label htmlFor="site_logo">URL del Logo del Sitio</Label>
+                                <Input id="site_logo" value={content.site_logo || ''} onChange={(e) => handleContentChange('site_logo', e.target.value)} className="mt-2 bg-black/30 border-white/20" />
+                            </div>
+                            {content.site_logo ? <img src={content.site_logo} alt="Logo Preview" className="h-10 w-auto bg-slate-700 p-1 rounded" /> : <div className="h-10 w-24 bg-slate-700 rounded flex items-center justify-center"><ImageIcon className="w-5 h-5 text-muted-foreground"/></div>}
+                        </div>
+                         <div className="grid md:grid-cols-[1fr_auto] items-center gap-4">
+                            <div>
+                                <Label htmlFor="site_favicon">URL del Favicon</Label>
+                                <Input id="site_favicon" value={content.site_favicon || ''} onChange={(e) => handleContentChange('site_favicon', e.target.value)} className="mt-2 bg-black/30 border-white/20" />
+                            </div>
+                            {content.site_favicon ? <img src={content.site_favicon} alt="Favicon Preview" className="h-10 w-10 bg-slate-700 p-1 rounded" /> : <div className="h-10 w-10 bg-slate-700 rounded flex items-center justify-center"><ImageIcon className="w-5 h-5 text-muted-foreground"/></div>}
+                        </div>
+                        <div className="grid md:grid-cols-[1fr_auto] items-center gap-4">
+                            <div>
+                                <Label htmlFor="hero_image_url">URL de Imagen Principal (Home)</Label>
+                                <Input id="hero_image_url" value={content.hero_image_url || ''} onChange={(e) => handleContentChange('hero_image_url', e.target.value)} className="mt-2 bg-black/30 border-white/20" />
+                            </div>
+                            {content.hero_image_url ? <img src={content.hero_image_url} alt="Hero Preview" className="h-10 w-auto bg-slate-700 p-1 rounded" /> : <div className="h-10 w-24 bg-slate-700 rounded flex items-center justify-center"><ImageIcon className="w-5 h-5 text-muted-foreground"/></div>}
+                        </div>
+                    </div>
+                </div>
+
                 <div className="glass-effect p-6 rounded-2xl">
                     <h3 className="text-xl font-semibold mb-4">Gestionar Secciones</h3>
                     <div className="space-y-4">
@@ -221,10 +258,35 @@ const ManageSiteContent = ({ onUpdate }) => {
                                 <div className="space-y-2">
                                     <Label>Icono</Label>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <Select name="icon" value={editingSection.icon || ''} onValueChange={(value) => setEditingSection(prev => ({...prev, icon: value, icon_image_url: ''}))}>
-                                            <SelectTrigger className="bg-black/30 border-white/20"><SelectValue placeholder="Seleccionar icono" /></SelectTrigger>
-                                            <SelectContent><SelectItem value="">Ninguno</SelectItem>{Object.entries(allIcons).map(([name, IconComponent]) => (<SelectItem key={name} value={name}><div className="flex items-center gap-2"><IconComponent className="w-4 h-4" /><span>{name}</span></div></SelectItem>))}</SelectContent>
-                                        </Select>
+                                        <Dialog open={isIconSelectorOpen} onOpenChange={setIsIconSelectorOpen}>
+                                            <DialogTrigger asChild>
+                                                <Button variant="outline" className="flex items-center gap-2">
+                                                    {SelectedIcon ? <SelectedIcon className="w-4 h-4" /> : 'Seleccionar'}
+                                                    <span>{editingSection.icon || 'Seleccionar icono'}</span>
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="max-w-2xl">
+                                                <DialogHeader>
+                                                    <DialogTitle>Seleccionar Icono</DialogTitle>
+                                                </DialogHeader>
+                                                <div className="relative">
+                                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                                     <Input placeholder="Buscar icono..." value={iconSearchTerm} onChange={(e) => setIconSearchTerm(e.target.value)} className="pl-10"/>
+                                                </div>
+                                                <div className="grid grid-cols-6 gap-2 max-h-96 overflow-y-auto mt-4 pr-3">
+                                                    {filteredIcons.map(([name, IconComponent]) => (
+                                                        <Button key={name} variant="outline" className="flex flex-col h-20" onClick={() => {
+                                                            setEditingSection(prev => ({...prev, icon: name, icon_image_url: ''}));
+                                                            setIsIconSelectorOpen(false);
+                                                            setIconSearchTerm('');
+                                                        }}>
+                                                            <IconComponent className="w-6 h-6 mb-1" />
+                                                            <span className="text-xs truncate">{name}</span>
+                                                        </Button>
+                                                    ))}
+                                                </div>
+                                            </DialogContent>
+                                        </Dialog>
                                         <Button asChild variant="outline"><label htmlFor="icon-upload" className="cursor-pointer w-full"><Upload className="w-4 h-4 mr-2" /> Subir Imagen<Input id="icon-upload" type="file" className="hidden" accept="image/*" onChange={handleIconImageFileChange} /></label></Button>
                                     </div>
                                     {(iconImagePreview || editingSection.icon_image_url) && <img src={iconImagePreview || editingSection.icon_image_url} alt="Icono" className="w-8 h-8 mt-2 rounded object-contain bg-slate-700 p-1" />}

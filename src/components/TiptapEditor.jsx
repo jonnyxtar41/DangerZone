@@ -187,7 +187,7 @@ const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aqu
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class: 'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none min-h-[200px] bg-background text-foreground p-4 rounded-b-lg border border-input border-t-0',
+        class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[200px] bg-background text-foreground p-4 rounded-b-lg border border-input border-t-0 w-full',
       },
       handleDrop: (view, event) => {
         const file = event.dataTransfer?.files?.[0];

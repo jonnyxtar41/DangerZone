@@ -50,7 +50,7 @@ const RecentItem = ({ item, type }) => {
             <div className="bg-primary/20 p-2 rounded-full">
                 {React.createElement(isPost ? BookOpen : MessageSquare, { className: "w-5 h-5 text-primary" })}
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
                 <p className="font-semibold text-foreground truncate">{title}</p>
                 <p className="text-xs text-muted-foreground">{date}</p>
             </div>
@@ -85,7 +85,7 @@ const Dashboard = ({ user, posts, categories, sections }) => {
             <h2 className="text-2xl md:text-3xl font-bold mb-2">Bienvenido de nuevo, {user.email.split('@')[0]}!</h2>
             <p className="text-muted-foreground mb-8">Aquí tienes un resumen de la actividad de tu sitio.</p>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
                 <StatCard title="Recursos" value={posts.length} icon={FileText} color="text-blue-400" />
                 <StatCard title="Categorías" value={categories.length} icon={Hash} color="text-purple-400" />
                 <StatCard title="Secciones" value={sections.length} icon={Folder} color="text-green-400" />
@@ -94,7 +94,7 @@ const Dashboard = ({ user, posts, categories, sections }) => {
 
             <div className="mb-8">
                 <h3 className="text-xl font-bold mb-4">Accesos Rápidos</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
                     <QuickAccessCard title="Añadir Recurso" to="../add-resource" icon={PlusSquare} />
                     <QuickAccessCard title="Gestionar Contenido" to="../manage-content" icon={Edit} />
                     <QuickAccessCard title="Ver Sitio Web" to="/" icon={Globe} isExternal={true} />
@@ -102,7 +102,7 @@ const Dashboard = ({ user, posts, categories, sections }) => {
                 </div>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="glass-effect p-4 md:p-6 rounded-2xl">
                     <h3 className="text-xl font-bold mb-4">Actividad Reciente</h3>
                     <div className="space-y-2">

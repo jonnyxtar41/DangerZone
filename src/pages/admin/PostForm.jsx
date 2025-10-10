@@ -52,7 +52,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
     const [currency, setCurrency] = useState(initialData.currency || 'USD');
     const [isDiscountActive, setIsDiscountActive] = useState(initialData.is_discount_active || false);
     const [discountPercentage, setDiscountPercentage] = useState(initialData.discount_percentage || '');
-
+    const [isFeatured, setIsFeatured] = useState(initialData.is_featured || false);
     // New features state
     const [view, setView] = useState('edit'); // 'edit' or 'preview'
     const [isScheduled, setIsScheduled] = useState(!!initialData.published_at && new Date(initialData.published_at) > new Date());
@@ -167,8 +167,8 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
     }, [toast, title, excerpt, editorRef]);
 
     const getPostData = useCallback(() => ({
-        title, postSectionId, postCategoryId, postSubcategoryId, excerpt, content, main_image_url: mainImagePreview, meta_title: metaTitle, meta_description: metaDescription, slug, keywords, custom_author_name: customAuthorName, show_author: showAuthor, show_date: showDate, show_main_image_in_post: showMainImageInPost, main_image_size_in_post: mainImageSizeInPost, hasDownload, downloadType, downloadUrl, isPremium, price, currency, isDiscountActive, discountPercentage, published_at: publishedAt, isScheduled, custom_fields: customFields, comments_enabled: commentsEnabled
-    }), [title, postSectionId, postCategoryId, postSubcategoryId, excerpt, content, mainImagePreview, metaTitle, metaDescription, slug, keywords, customAuthorName, showAuthor, showDate, showMainImageInPost, mainImageSizeInPost, hasDownload, downloadType, downloadUrl, isPremium, price, currency, isDiscountActive, discountPercentage, publishedAt, isScheduled, customFields, commentsEnabled]);
+        title, postSectionId, postCategoryId, postSubcategoryId, excerpt, content, main_image_url: mainImagePreview, meta_title: metaTitle, meta_description: metaDescription, slug, keywords, custom_author_name: customAuthorName, show_author: showAuthor, show_date: showDate, show_main_image_in_post: showMainImageInPost, main_image_size_in_post: mainImageSizeInPost, hasDownload, downloadType, downloadUrl, isPremium, price, currency, isDiscountActive, discountPercentage, published_at: publishedAt, isScheduled, custom_fields: customFields, isFeatured,  comments_enabled: commentsEnabled
+    }), [title, postSectionId, postCategoryId, postSubcategoryId, excerpt, content, mainImagePreview, metaTitle, metaDescription, slug, keywords, customAuthorName, showAuthor, showDate, showMainImageInPost, mainImageSizeInPost, hasDownload, downloadType, downloadUrl, isPremium, price, currency, isDiscountActive, discountPercentage, publishedAt, isScheduled, customFields,isFeatured, commentsEnabled]);
 
     const handleLoadTemplate = (template) => {
         if (!template || !template.content) return;
@@ -251,6 +251,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
             published_at: isScheduled ? new Date(publishedAt).toISOString() : (status === 'published' ? new Date().toISOString() : null),
             author: user.email,
             download: downloadData,
+            is_featured: isFeatured,
             user_id: user.id
         };
 
@@ -332,6 +333,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
         setIsScheduled(false);
         setPublishedAt('');
         setCustomFields([]);
+        setIsFeatured(false);
         setCommentsEnabled(false);
         setIsSaved(false); // Importante para volver a mostrar el formulario
         
@@ -410,6 +412,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
                             discountPercentage={discountPercentage} setDiscountPercentage={setDiscountPercentage}
                             isScheduled={isScheduled} setIsScheduled={setIsScheduled}
                             publishedAt={publishedAt} setPublishedAt={setPublishedAt}
+                            isFeatured={isFeatured} setIsFeatured={setIsFeatured}
                             onLoadTemplate={handleLoadTemplate}
                             getTemplateData={getPostData}
                             commentsEnabled={commentsEnabled} setCommentsEnabled={setCommentsEnabled}
@@ -418,11 +421,11 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
                     <PostFormSeo metaTitle={metaTitle} setMetaTitle={setMetaTitle} slug={slug} setSlug={setSlug} generateSlug={generateSlug} metaDescription={metaDescription} setMetaDescription={setMetaDescription} mainImagePreview={mainImagePreview} setMainImagePreview={setMainImagePreview} keywords={keywords} setKeywords={setKeywords} onAiAction={handleAiAction} isAiLoading={isAiLoading} />
                     
                     <div className="pt-8 mt-8 border-t-2 border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <div className="flex-1">
+                        <div className="w-full sm:w-auto">
                             {isEditing && isAdmin && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="destructive" size="lg" className="px-8 py-6 text-lg" disabled={isUploading}><Trash2 className="mr-2 h-5 w-5" />Eliminar Recurso</Button>
+                                        <Button variant="destructive" size="lg" className="px-8 py-6 text-lg w-full" disabled={isUploading}><Trash2 className="mr-2 h-5 w-5" />Eliminar Recurso</Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader><AlertDialogTitle>¿Confirmas la eliminación?</AlertDialogTitle><AlertDialogDescription>Esta acción es irreversible.</AlertDialogDescription></AlertDialogHeader>
@@ -431,18 +434,18 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
                                 </AlertDialog>
                             )}
                         </div>
-                        <div className="flex-1 flex flex-col sm:flex-row justify-end gap-4">
+                        <div className="flex flex-col sm:flex-row justify-end gap-4 w-full sm:w-auto">
                             {isAdmin ? (
                                 <>
-                                    <Button type="button" variant="outline" size="lg" onClick={() => handleFormSubmit('draft')} className="px-8 py-6 text-lg" disabled={isUploading}><Save className="mr-2 h-5 w-5" />Guardar Borrador</Button>
+                                    <Button type="button" variant="outline" size="lg" onClick={() => handleFormSubmit('draft')} className="px-8 py-6 text-lg w-full" disabled={isUploading}><Save className="mr-2 h-5 w-5" />Guardar Borrador</Button>
                                     {isScheduled ? (
-                                        <Button type="button" size="lg" onClick={() => handleFormSubmit('scheduled')} className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white px-8 py-6 text-lg font-semibold" disabled={isUploading}><CalendarClock className="mr-2 h-5 w-5" />Programar</Button>
+                                        <Button type="button" size="lg" onClick={() => handleFormSubmit('scheduled')} className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white px-8 py-6 text-lg font-semibold w-full" disabled={isUploading}><CalendarClock className="mr-2 h-5 w-5" />Programar</Button>
                                     ) : (
-                                        <Button type="button" size="lg" onClick={() => handleFormSubmit('published')} className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-6 text-lg font-semibold" disabled={isUploading}><Send className="mr-2 h-5 w-5" />{isEditing ? 'Actualizar y Publicar' : 'Publicar'}</Button>
+                                        <Button type="button" size="lg" onClick={() => handleFormSubmit('published')} className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-6 text-lg font-semibold w-full" disabled={isUploading}><Send className="mr-2 h-5 w-5" />{isEditing ? 'Actualizar y Publicar' : 'Publicar'}</Button>
                                     )}
                                 </>
                             ) : (
-                                <Button type="button" size="lg" onClick={() => handleFormSubmit('pending_approval')} className="bg-gradient-to-r from-orange-500 to-yellow-600 text-white px-8 py-6 text-lg font-semibold" disabled={isUploading}><Send className="mr-2 h-5 w-5" />{isEditing ? 'Proponer Edición' : 'Enviar para Revisión'}</Button>
+                                <Button type="button" size="lg" onClick={() => handleFormSubmit('pending_approval')} className="bg-gradient-to-r from-orange-500 to-yellow-600 text-white px-8 py-6 text-lg font-semibold w-full" disabled={isUploading}><Send className="mr-2 h-5 w-5" />{isEditing ? 'Proponer Edición' : 'Enviar para Revisión'}</Button>
                             )}
                         </div>
                     </div>

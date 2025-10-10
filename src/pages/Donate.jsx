@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -12,6 +12,7 @@ import { getAllSiteContent, addPayment } from '@/lib/supabase/siteContent';
 import { Heart, CreditCard, Loader2 } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
+
 
 const StripeDonationForm = ({ clientSecret, amount, currency, name, email }) => {
     const stripe = useStripe();
@@ -28,8 +29,8 @@ const StripeDonationForm = ({ clientSecret, amount, currency, name, email }) => 
 
         const { error, paymentIntent } = await stripe.confirmPayment({
             elements,
-            confirmParams: { 
-                return_url: `${window.location.origin}/donar?status=success` 
+            confirmParams: {
+                return_url: `${window.location.origin}/donar?status=success`
             },
             redirect: 'if_required'
         });
@@ -71,6 +72,7 @@ const StripeDonationForm = ({ clientSecret, amount, currency, name, email }) => 
     );
 };
 
+
 const Donate = () => {
     const { toast } = useToast();
     const { user } = useAuth();
@@ -103,43 +105,43 @@ const Donate = () => {
             window.history.replaceState({}, document.title, "/donar");
         }
     }, [toast]);
-    
+
     const setupPayPal = useCallback(() => {
         if (!config.paypal_client_id || !document.getElementById('paypal-button-container') || window.paypal) return;
-    
+
         const script = document.createElement("script");
         script.src = `https://www.paypal.com/sdk/js?client-id=${config.paypal_client_id}&currency=${config.donation_currency}&intent=capture`;
         script.onload = () => {
-          if (window.paypal) {
-            window.paypal.Buttons({
-              createOrder: (data, actions) => {
-                if (amount <= 0) {
-                    toast({ title: '💰 El monto debe ser mayor a cero.', variant: 'destructive' });
-                    return;
-                }
-                return actions.order.create({
-                    purchase_units: [{ amount: { value: String(amount) } }]
-                });
-              },
-              onApprove: (data, actions) => actions.order.capture().then(async (details) => {
-                await addPayment({
-                    user_id: user?.id,
-                    email: details.payer.email_address,
-                    amount: details.purchase_units[0].amount.value,
-                    currency: details.purchase_units[0].amount.currency_code,
-                    payment_provider: 'paypal',
-                    provider_payment_id: details.id,
-                    status: 'succeeded',
-                    item_type: 'donation',
-                    donor_name: `${details.payer.name.given_name} ${details.payer.name.surname}`,
-                });
-                toast({ title: '💖 ¡Donación con PayPal exitosa!', description: `Gracias por tu donación, ${details.payer.name.given_name}!` });
-              })
-            }).render('#paypal-button-container').catch(err => console.error("PayPal render error:", err));
-          }
+            if (window.paypal) {
+                window.paypal.Buttons({
+                    createOrder: (data, actions) => {
+                        if (amount <= 0) {
+                            toast({ title: '💰 El monto debe ser mayor a cero.', variant: 'destructive' });
+                            return;
+                        }
+                        return actions.order.create({
+                            purchase_units: [{ amount: { value: String(amount) } }]
+                        });
+                    },
+                    onApprove: (data, actions) => actions.order.capture().then(async (details) => {
+                        await addPayment({
+                            user_id: user?.id,
+                            email: details.payer.email_address,
+                            amount: details.purchase_units[0].amount.value,
+                            currency: details.purchase_units[0].amount.currency_code,
+                            payment_provider: 'paypal',
+                            provider_payment_id: details.id,
+                            status: 'succeeded',
+                            item_type: 'donation',
+                            donor_name: `${details.payer.name.given_name} ${details.payer.name.surname}`,
+                        });
+                        toast({ title: '💖 ¡Donación con PayPal exitosa!', description: `Gracias por tu donación, ${details.payer.name.given_name}!` });
+                    })
+                }).render('#paypal-button-container').catch(err => console.error("PayPal render error:", err));
+            }
         };
         document.body.appendChild(script);
-    
+
     }, [config.paypal_client_id, config.donation_currency, amount, toast, user]);
 
     useEffect(() => {
@@ -150,7 +152,7 @@ const Donate = () => {
                 acc[item.key] = item.value;
                 return acc;
             }, {});
-            setConfig(prev => ({...prev, ...contentMap}));
+            setConfig(prev => ({ ...prev, ...contentMap }));
             if (contentMap.stripe_publishable_key) {
                 setStripePromise(loadStripe(contentMap.stripe_publishable_key));
             }
@@ -205,7 +207,12 @@ const Donate = () => {
         setIsProcessing(true);
         try {
             const { data, error } = await supabase.functions.invoke('create-payment-intent', {
-                body: { amount, currency: config.donation_currency, name, email },
+                body: {
+                    amount: Math.round(amount * 100), // Corregido: Enviar en centavos
+                    currency: config.donation_currency,
+                    name,
+                    email
+                },
             });
             if (error) throw new Error(error.message);
             if (data.error) throw new Error(data.error);
@@ -273,7 +280,7 @@ const Donate = () => {
                                 </Elements>
                             )
                         )}
-                        
+
                         {config.paypal_client_id && (
                             <>
                                 <div className="relative my-8">

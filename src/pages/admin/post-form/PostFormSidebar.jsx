@@ -5,7 +5,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { DollarSign, Percent, CalendarClock, Save, Book, Trash2, Loader2, MessageSquare } from 'lucide-react';
+import { DollarSign, Percent, CalendarClock, Save, Book, Trash2, Loader2, MessageSquare, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
@@ -27,9 +27,10 @@ const PostFormSidebar = ({
     discountPercentage, setDiscountPercentage,
     isScheduled, setIsScheduled,
     publishedAt, setPublishedAt,
+    isFeatured, setIsFeatured, // Nueva prop
     onLoadTemplate,
     getTemplateData,
-    commentsEnabled, setCommentsEnabled, // New prop for comments
+    commentsEnabled, setCommentsEnabled,
 }) => {
     const { permissions } = useAuth();
     const { toast } = useToast();
@@ -84,6 +85,10 @@ const PostFormSidebar = ({
                     <div className="space-y-4">
                         <h3 className="text-lg font-semibold">Publicación</h3>
                         <div className="flex items-center justify-between">
+                            <Label htmlFor="is-featured" className="flex items-center gap-2"><Star className="w-4 h-4 text-yellow-400" />Marcar como destacado</Label>
+                            <Switch id="is-featured" checked={isFeatured} onCheckedChange={setIsFeatured} />
+                        </div>
+                        <div className="flex items-center justify-between pt-4 border-t border-border/50">
                             <Label htmlFor="is-scheduled">Programar Publicación</Label>
                             <Switch id="is-scheduled" checked={isScheduled} onCheckedChange={setIsScheduled} />
                         </div>

@@ -22,7 +22,7 @@ const ManagePayments = () => {
     const [paymentConfig, setPaymentConfig] = useState({
         paypal_client_id: '',
         stripe_publishable_key: '',
-        stripe_secret_key: '',
+        // stripe_secret_key is removed for security
         donation_page_title: '',
         donation_page_description: '',
         donation_options: '',
@@ -92,10 +92,8 @@ const ManagePayments = () => {
     const handleSaveConfig = async () => {
         setLoadingConfig(true);
         try {
-            const configToSave = {...paymentConfig};
-            if (!configToSave.stripe_secret_key) {
-                delete configToSave.stripe_secret_key;
-            }
+            // Secret key is no longer managed here
+            const { stripe_secret_key, ...configToSave } = paymentConfig;
 
             await Promise.all(
                 Object.entries(configToSave).map(([key, value]) => 
@@ -263,15 +261,13 @@ const ManagePayments = () => {
                                     <Alert>
                                         <Info className="h-4 w-4" />
                                         <AlertTitle>¡Importante!</AlertTitle>
-                                        <AlertDescription>Tu Clave Secreta de Stripe se guarda de forma segura y no se volverá a mostrar. Si la cambias, se sobrescribirá la anterior.</AlertDescription>
+                                        <AlertDescription>
+                                            Tu Clave Secreta de Stripe debe ser configurada como una variable de entorno en tu proyecto de Supabase para mayor seguridad. No la gestiones desde aquí.
+                                        </AlertDescription>
                                     </Alert>
                                     <div>
                                         <Label htmlFor="stripe_publishable_key">Stripe Publishable Key</Label>
                                         <Input id="stripe_publishable_key" value={paymentConfig.stripe_publishable_key || ''} onChange={(e) => handleConfigChange('stripe_publishable_key', e.target.value)} className="mt-2 bg-black/30 border-white/20" placeholder="pk_live_..." />
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="stripe_secret_key">Stripe Secret Key</Label>
-                                        <Input id="stripe_secret_key" type="password" onChange={(e) => handleConfigChange('stripe_secret_key', e.target.value)} className="mt-2 bg-black/30 border-white/20" placeholder="••••••••••••••••••••••••" />
                                     </div>
                                 </div>
                             </>
