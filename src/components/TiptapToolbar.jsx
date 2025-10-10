@@ -8,7 +8,7 @@ import {
   Link, Image as ImageIcon, Youtube,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
   Sparkles,
-  Table, Columns, Rows, Merge, Split, Trash2, PaintBucket,
+  Table, Columns, Rows, Merge, Split, Trash2, PaintBucket, EyeOff
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -144,6 +144,16 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
           <DropdownMenuItem onSelect={() => editor.chain().focus().mergeCells().run()} disabled={!editor.can().mergeCells()}><Merge className="w-4 h-4 mr-2" />Combinar Celdas</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => editor.chain().focus().splitCell().run()} disabled={!editor.can().splitCell()}><Split className="w-4 h-4 mr-2" />Dividir Celda</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => editor.chain().focus().toggleHeaderRow().run()} disabled={!editor.can().toggleHeaderRow()}><Rows className="w-4 h-4 mr-2" />Alternar Fila de Encabezado</DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              const { invisible } = editor.getAttributes('table');
+              editor.chain().focus().updateAttributes('table', { invisible: !invisible }).run();
+            }}
+            disabled={!editor.isActive('table')}
+          >
+            <EyeOff className="w-4 h-4 mr-2" />
+            Alternar Bordes Visibles
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 

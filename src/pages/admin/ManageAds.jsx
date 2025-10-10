@@ -20,14 +20,14 @@ const AdCard = ({ ad, onUpdate }) => {
             className="glass-effect p-6 rounded-2xl space-y-4"
         >
             <div className="flex justify-between items-center">
-                <h3 className="text-xl font-bold text-white">{ad.name}</h3>
+                <h3 className="text-xl font-bold text-foreground">{ad.name}</h3>
                 <Switch
                     checked={ad.visible}
                     onCheckedChange={(checked) => onUpdate(ad.id, 'visible', checked)}
                     aria-label={`Activar/desactivar ${ad.name}`}
                 />
             </div>
-            <p className="text-sm text-gray-400">ID del bloque: <code className="bg-black/40 px-1.5 py-0.5 rounded text-yellow-400">{ad.id}</code></p>
+            <p className="text-sm text-muted-foreground">ID del bloque: <code className="bg-muted px-1.5 py-0.5 rounded text-special">{ad.id}</code></p>
             <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -36,7 +36,7 @@ const AdCard = ({ ad, onUpdate }) => {
                             id={`width-${ad.id}`}
                             value={ad.width}
                             onChange={(e) => onUpdate(ad.id, 'width', e.target.value)}
-                            className="mt-1 bg-black/30 border-white/20"
+                            className="mt-1 bg-input"
                             placeholder="Ej: 300 o 100%"
                         />
                     </div>
@@ -46,7 +46,7 @@ const AdCard = ({ ad, onUpdate }) => {
                             id={`height-${ad.id}`}
                             value={ad.height}
                             onChange={(e) => onUpdate(ad.id, 'height', e.target.value)}
-                            className="mt-1 bg-black/30 border-white/20"
+                            className="mt-1 bg-input"
                             placeholder="Ej: 250"
                         />
                     </div>
@@ -59,7 +59,7 @@ const AdCard = ({ ad, onUpdate }) => {
                             type="number"
                             value={ad.countdown}
                             onChange={(e) => onUpdate(ad.id, 'countdown', parseInt(e.target.value, 10))}
-                            className="mt-1 bg-black/30 border-white/20"
+                            className="mt-1 bg-input"
                             placeholder="Ej: 5"
                         />
                     </div>
@@ -70,7 +70,7 @@ const AdCard = ({ ad, onUpdate }) => {
                         id={`code-${ad.id}`}
                         value={ad.code}
                         onChange={(e) => onUpdate(ad.id, 'code', e.target.value)}
-                        className="mt-1 bg-black/30 border-white/20 font-mono text-xs"
+                        className="mt-1 bg-input font-mono text-xs"
                         placeholder="Pega aquí tu código de AdSense o similar."
                         rows={6}
                     />
@@ -134,7 +134,7 @@ const ManageAds = () => {
                     <Megaphone className="w-8 h-8 text-yellow-400" />
                     Gestionar Anuncios
                 </h2>
-                <p className="text-gray-300 max-w-2xl mx-auto">
+                <p className="text-muted-foreground max-w-2xl mx-auto">
                     Controla la visibilidad, tamaño y código de cada bloque publicitario de tu sitio.
                 </p>
             </div>

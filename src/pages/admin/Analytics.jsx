@@ -13,7 +13,7 @@ const StatCard = ({ title, value, icon, color }) => (
     <div className="glass-effect p-6 rounded-2xl flex items-center justify-between">
         <div>
             <p className="text-muted-foreground text-sm">{title}</p>
-            <p className="text-4xl font-bold text-white">{value}</p>
+            <p className="text-4xl font-bold text-foreground">{value}</p>
         </div>
         {React.createElement(icon, { className: `w-12 h-12 ${color}` })}
     </div>
@@ -251,12 +251,12 @@ const Analytics = ({ posts, categories, subcategories, sections }) => {
                                 <div key={item.id} className="p-4 rounded-lg flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-background/50">
                                     <h4 className="font-bold text-lg flex-1 truncate">{item.title}</h4>
                                     <div className="flex items-center gap-6 text-sm">
-                                        <div className="flex items-center gap-2 text-blue-300">
-                                            <Eye className="w-5 h-5" />
+                                        <div className="flex items-center gap-2 text-muted-foreground">
+                                            <Eye className="w-5 h-5 text-blue-400" />
                                             <span className="font-semibold">{(item.stats.visits || 0).toLocaleString()}</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-green-300">
-                                            <Download className="w-5 h-5" />
+                                        <div className="flex items-center gap-2 text-muted-foreground">
+                                            <Download className="w-5 h-5 text-green-400" />
                                             <span className="font-semibold">{(item.stats.downloads || 0).toLocaleString()}</span>
                                         </div>
                                     </div>

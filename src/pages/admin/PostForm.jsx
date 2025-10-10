@@ -17,6 +17,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { deletePost } from '@/lib/supabase/posts';
 import { uploadDownloadableAsset } from '@/lib/supabase/assets';
+import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/lib/customSupabaseClient'; // <-- Importante: Añadir esta línea
 
 const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) => {
     const { toast } = useToast();
@@ -68,6 +70,101 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
 
     const isEditing = !!initialData.id;
     const isAdmin = permissions?.['manage-content'];
+
+    const handleAiAction = useCallback(async (action, promptOverride = '') => {
+        setIsAiLoading(true);
+        toast({ title: '🤖 La IA está pensando...' });
+        try {
+            const getSelectedText = () => editorRef.current ? editorRef.current.state.doc.cut(editorRef.current.state.selection.from, editorRef.current.state.selection.to).textContent : '';
+            const selectedText = getSelectedText();
+            let prompt;
+
+            switch(action) {
+                case 'generate-title':
+                    prompt = `Genera un título SEO optimizado y atractivo para un artículo basado en el siguiente borrador: "${title}".`;
+                    break;
+                case 'generate-excerpt':
+                    prompt = `Crea un resumen (excerpt) atractivo y conciso para un artículo titulado "${title}".`;
+                    break;
+                case 'generate-meta-title':
+                    prompt = `Genera un meta título SEO (máximo 60 caracteres) para un artículo titulado "${title}".`;
+                    break;
+                case 'generate-meta-description':
+                    prompt = `Genera una meta descripción SEO (máximo 160 caracteres) para un artículo titulado "${title}" con el resumen: "${excerpt}".`;
+                    break;
+                case 'generate-keywords':
+                    prompt = `Sugiere 5-7 palabras clave (keywords) relevantes en formato CSV (ej: keyword1, keyword2, keyword3) para un artículo titulado "${title}".`;
+                    break;
+                case 'improve-writing':
+                    if (!selectedText) throw new Error('Selecciona un texto para mejorar.');
+                    prompt = `Mejora la redacción del siguiente texto: "${selectedText}".`;
+                    break;
+                case 'fix-grammar':
+                    if (!selectedText) throw new Error('Selecciona un texto para corregir.');
+                    prompt = `Corrige la gramática y ortografía del siguiente texto: "${selectedText}".`;
+                    break;
+                case 'make-shorter':
+                    if (!selectedText) throw new Error('Selecciona un texto para acortar.');
+                    prompt = `Haz más corto el siguiente texto: "${selectedText}".`;
+                    break;
+                case 'make-longer':
+                    if (!selectedText) throw new Error('Selecciona un texto para alargar.');
+                    prompt = `Haz más largo y detallado el siguiente texto: "${selectedText}".`;
+                    break;
+                case 'generate-content':
+                     if (!promptOverride) throw new Error('El prompt no puede estar vacío.');
+                    prompt = promptOverride;
+                    break;
+                default:
+                    throw new Error('Acción de IA no reconocida');
+            }
+
+            // --- LLAMADA A TU FUNCIÓN DE SUPABASE ---
+            const { data, error } = await supabase.functions.invoke('ai-assistant', {
+                body: { prompt },
+            });
+
+            if (error) {
+                throw new Error(`Error en la función de Supabase: ${error.message}`);
+            }
+
+            if (data.error) {
+                throw new Error(`Error devuelto por la IA: ${data.error}`);
+            }
+
+            const response = data.response;
+            // --- FIN DE LA LLAMADA ---
+
+            if (!response) {
+                throw new Error('La IA no devolvió una respuesta válida.');
+            }
+
+            if (action.startsWith('generate-')) {
+                if (action === 'generate-title') setTitle(response);
+                if (action === 'generate-excerpt') setExcerpt(response);
+                if (action === 'generate-meta-title') setMetaTitle(response);
+                if (action === 'generate-meta-description') setMetaDescription(response);
+                if (action === 'generate-keywords') setKeywords(response.split(',').map(k => k.trim()));
+                if (action === 'generate-content' && editorRef.current) {
+                    editorRef.current.commands.insertContent(response);
+                }
+            } else if (editorRef.current && selectedText) {
+                const { from, to } = editorRef.current.state.selection;
+                editorRef.current.chain().focus().insertContentAt({ from, to }, response).run();
+            } else if (editorRef.current) {
+                editorRef.current.chain().focus().insertContent(response).run();
+            }
+
+            toast({ title: '✅ Contenido generado por IA' });
+
+        } catch (error) {
+            toast({ title: '❌ Error de IA', description: error.message, variant: 'destructive' });
+        } finally {
+            setIsAiLoading(false);
+            setIsAiPromptOpen(false);
+            setCustomPrompt('');
+        }
+    }, [toast, title, excerpt, editorRef]);
 
     const getPostData = useCallback(() => ({
         title, postSectionId, postCategoryId, postSubcategoryId, excerpt, content, main_image_url: mainImagePreview, meta_title: metaTitle, meta_description: metaDescription, slug, keywords, custom_author_name: customAuthorName, show_author: showAuthor, show_date: showDate, show_main_image_in_post: showMainImageInPost, main_image_size_in_post: mainImageSizeInPost, hasDownload, downloadType, downloadUrl, isPremium, price, currency, isDiscountActive, discountPercentage, published_at: publishedAt, isScheduled, custom_fields: customFields, comments_enabled: commentsEnabled
@@ -203,7 +300,52 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
         return str.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
     };
 
-    const resetForm = () => { /* ... existing reset logic ... */ };
+    const resetForm = () => {
+        setTitle('');
+        setPostSectionId('');
+        setPostCategoryId('');
+        setPostSubcategoryId('');
+        setExcerpt('');
+        setContent('');
+        if (editorRef.current) {
+            editorRef.current.commands.clearContent();
+        }
+        setMainImagePreview('');
+        setMetaTitle('');
+        setMetaDescription('');
+        setSlug('');
+        setKeywords([]);
+        setCustomAuthorName('');
+        setShowAuthor(true);
+        setShowDate(true);
+        setShowMainImageInPost(true);
+        setMainImageSizeInPost('medium');
+        setHasDownload(false);
+        setDownloadType('url');
+        setDownloadUrl('');
+        setDownloadFile(null);
+        setIsPremium(false);
+        setPrice('');
+        setCurrency('USD');
+        setIsDiscountActive(false);
+        setDiscountPercentage('');
+        setIsScheduled(false);
+        setPublishedAt('');
+        setCustomFields([]);
+        setCommentsEnabled(false);
+        setIsSaved(false); // Importante para volver a mostrar el formulario
+        
+        // Limpiar el input del archivo de descarga
+        const downloadFileInput = document.querySelector('input[type="file"]');
+        if (downloadFileInput) {
+            downloadFileInput.value = '';
+        }
+        
+        toast({
+            title: "Formulario limpio",
+            description: "Puedes añadir un nuevo recurso.",
+        });
+    };
 
     const handleDeletePost = async () => {
         if (!isEditing) return;
@@ -217,8 +359,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
         }
     };
     
-    const handleAiAction = useCallback(async (action, promptOverride = '') => { /* ... existing AI logic ... */ }, [toast, title, editorRef]);
-    const handleGenerateContentClick = () => setIsAiPromptOpen(true);
+    const handleGenerateContentClick = useCallback(() => setIsAiPromptOpen(true), []);
 
     if (isSaved && !isEditing) {
         return (
@@ -315,8 +456,27 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
                 />
             )}
 
-            <Dialog open={isAiPromptOpen} onOpenChange={setIsAiPromptOpen}>
-                 {/* ... existing AI Dialog ... */}
+             <Dialog open={isAiPromptOpen} onOpenChange={setIsAiPromptOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Generar Contenido con IA</DialogTitle>
+                        <DialogDescription>
+                            Escribe un prompt detallado para que la IA genere el contenido.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Textarea
+                        placeholder="Ej: Escribe un artículo de 500 palabras sobre..."
+                        value={customPrompt}
+                        onChange={(e) => setCustomPrompt(e.target.value)}
+                        rows={5}
+                    />
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsAiPromptOpen(false)}>Cancelar</Button>
+                        <Button onClick={() => handleAiAction('generate-content', customPrompt)} disabled={isAiLoading}>
+                            {isAiLoading ? 'Generando...' : 'Generar'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
             </Dialog>
         </motion.div>
     );

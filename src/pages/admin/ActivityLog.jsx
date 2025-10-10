@@ -116,13 +116,13 @@ const ActivityLog = () => {
                             <div key={log.id} className="bg-background/50 p-4 rounded-lg flex items-start gap-4">
                                 <span className="text-xl mt-1">{getActionIcon(log.action)}</span>
                                 <div className="flex-grow">
-                                    <p className="font-semibold text-white">{log.action}</p>
+                                    <p className="font-semibold text-foreground">{log.action}</p>
                                     <div className="text-sm text-muted-foreground flex items-center gap-4 mt-1 flex-wrap">
                                         <span className="flex items-center gap-1.5"><User className="w-3 h-3" /> {log.user_email || 'Sistema'}</span>
                                         <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" /> {formatDistanceToNow(new Date(log.created_at), { addSuffix: true, locale: es })}</span>
                                     </div>
                                     {log.details && (
-                                        <pre className="mt-2 text-xs bg-black/30 p-2 rounded-md overflow-x-auto text-gray-400">
+                                        <pre className="mt-2 text-xs bg-black/30 p-2 rounded-md overflow-x-auto text-muted-foreground">
                                             {JSON.stringify(log.details, null, 2)}
                                         </pre>
                                     )}

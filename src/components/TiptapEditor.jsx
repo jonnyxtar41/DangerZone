@@ -108,6 +108,25 @@ const ResizableImage = BaseImage.extend({
   },
 });
 
+// Extensión de Tabla con atributo de invisibilidad
+const TableWithInvisibility = Table.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      invisible: {
+        default: false,
+        parseHTML: element => element.getAttribute('data-invisible') === 'true',
+        renderHTML: attributes => {
+          if (attributes.invisible) {
+            return { 'data-invisible': 'true' };
+          }
+          return {};
+        },
+      },
+    };
+  },
+});
+
 // --- Extensión para las celdas de la tabla (soluciona el espaciado) ---
 const TableCell = BaseTableCell.extend({
   content: 'block+',
@@ -159,7 +178,7 @@ const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aqu
           class: 'bg-yellow-200/50 dark:bg-yellow-400/50',
         },
       }),
-      Table.configure({ resizable: true, allowTableNodeSelection: true }),
+      TableWithInvisibility.configure({ resizable: true, allowTableNodeSelection: true }),
       TableRow,
       TableHeader,
       TableCell,

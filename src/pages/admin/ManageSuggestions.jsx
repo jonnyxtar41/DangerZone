@@ -86,8 +86,8 @@ const ManageSuggestions = () => {
                         suggestions.map(suggestion => (
                             <div key={suggestion.id} className="bg-background/50 p-6 rounded-lg flex items-start gap-4">
                                 <div className="flex-grow">
-                                    <p className="text-white mb-4">{suggestion.message}</p>
-                                    <div className="text-sm text-muted-foreground flex items-center gap-6 pt-3 border-t border-white/10">
+                                    <p className="text-foreground mb-4">{suggestion.message}</p>
+                                    <div className="text-sm text-muted-foreground flex items-center gap-6 pt-3 border-t border-border/10">
                                         <span className="flex items-center gap-1.5"><Mail className="w-3 h-3" /> {suggestion.email || 'Anónimo'}</span>
                                         <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" /> {formatDistanceToNow(new Date(suggestion.created_at), { addSuffix: true, locale: es })}</span>
                                     </div>

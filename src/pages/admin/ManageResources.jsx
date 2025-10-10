@@ -13,7 +13,7 @@ const StatCard = ({ title, value, icon, status, unit }) => {
     return (
         <div className="glass-effect p-6 rounded-2xl">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-300 flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-muted-foreground flex items-center gap-2">
                     {React.createElement(icon, { className: "w-6 h-6 text-primary" })}
                     {title}
                 </h3>
@@ -22,7 +22,7 @@ const StatCard = ({ title, value, icon, status, unit }) => {
                     <span>{status === 'ok' ? 'Operacional' : 'Advertencia'}</span>
                 </div>
             </div>
-            <p className="text-4xl font-bold text-white">{value} <span className="text-2xl text-gray-400">{unit}</span></p>
+            <p className="text-4xl font-bold text-foreground">{value} <span className="text-2xl text-muted-foreground">{unit}</span></p>
         </div>
     );
 };
@@ -31,10 +31,10 @@ const FunctionCard = ({ name, status }) => {
     const statusColor = status === 'ACTIVE' ? 'bg-green-500' : 'bg-yellow-500';
     return (
         <div className="bg-background/50 p-4 rounded-lg flex justify-between items-center">
-            <p className="font-mono text-white">{name}</p>
+            <p className="font-mono text-foreground">{name}</p>
             <div className="flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${statusColor}`}></div>
-                <span className="text-sm text-gray-300">{status}</span>
+                <span className="text-sm text-muted-foreground">{status}</span>
             </div>
         </div>
     );
@@ -122,7 +122,7 @@ const ManageResources = () => {
                     </div>
 
                     <div className="glass-effect p-6 rounded-2xl">
-                        <h3 className="text-lg font-semibold text-gray-300 flex items-center gap-2 mb-4">
+                        <h3 className="text-lg font-semibold text-muted-foreground flex items-center gap-2 mb-4">
                             <Server className="w-6 h-6 text-primary" />
                             Funciones del Servidor (Edge Functions)
                         </h3>
@@ -136,7 +136,7 @@ const ManageResources = () => {
                     </div>
 
                     <div className="glass-effect p-6 rounded-2xl">
-                        <h3 className="text-lg font-semibold text-gray-300 flex items-center gap-2 mb-4">
+                        <h3 className="text-lg font-semibold text-muted-foreground flex items-center gap-2 mb-4">
                             <Share2 className="w-6 h-6 text-primary" />
                             Esquema de la Base de Datos
                         </h3>
@@ -144,18 +144,18 @@ const ManageResources = () => {
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {dbSchema.tables.map(table => (
                                     <div key={table.table_name} className="bg-background/50 p-4 rounded-lg">
-                                        <h4 className="font-bold text-lg text-white flex items-center gap-2"><Table className="w-5 h-5 text-secondary-foreground" /> {table.table_name}</h4>
-                                        <ul className="mt-2 space-y-1 text-sm text-gray-400 pl-2 border-l-2 border-primary/30">
+                                        <h4 className="font-bold text-lg text-foreground flex items-center gap-2"><Table className="w-5 h-5 text-secondary-foreground" /> {table.table_name}</h4>
+                                        <ul className="mt-2 space-y-1 text-sm text-muted-foreground pl-2 border-l-2 border-primary/30">
                                             {table.columns.map(col => (
                                                 <li key={col.column_name} className="flex items-center gap-2 font-mono">
                                                     {col.is_primary_key && <Key className="w-3 h-3 text-yellow-400" />}
-                                                    {col.column_name}: <span className="text-gray-500">{col.data_type}</span>
+                                                    {col.column_name}: <span className="text-text-subtle">{col.data_type}</span>
                                                 </li>
                                             ))}
                                         </ul>
                                         {table.foreign_keys.length > 0 && (
-                                            <div className="mt-3 pt-3 border-t border-white/10">
-                                                <h5 className="text-xs font-semibold uppercase text-gray-500 mb-2">Relaciones</h5>
+                                            <div className="mt-3 pt-3 border-t border-border/10">
+                                                <h5 className="text-xs font-semibold uppercase text-text-subtle mb-2">Relaciones</h5>
                                                 <ul className="space-y-2 text-sm">
                                                     {table.foreign_keys.map(fk => (
                                                         <li key={fk.constraint_name} className="flex items-center gap-2 text-cyan-400 font-mono">

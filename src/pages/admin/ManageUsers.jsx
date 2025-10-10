@@ -98,7 +98,8 @@ const ManageUsers = () => {
 
     useEffect(() => {
         fetchUsersAndRoles();
-    }, [fetchUsersAndRoles]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleAddUser = async () => {
         if (!newUserEmail || !newUserPassword || !newUserRoleId) {
@@ -239,7 +240,7 @@ const ManageUsers = () => {
                     <div key={user.id} className="glass-effect p-4 rounded-lg flex justify-between items-center">
                         <div>
                             <p className="font-bold">{user.email}</p>
-                            <p className="text-sm text-gray-400">Rol: {user.role?.name || 'No asignado'}</p>
+                            <p className="text-sm text-muted-foreground">Rol: {user.role?.name || 'No asignado'}</p>
                         </div>
                         <div className="flex items-center gap-2">
                             <Dialog open={isEditRoleDialogOpen && editingUser?.id === user.id} onOpenChange={(isOpen) => { if (!isOpen) setEditingUser(null); setEditRoleDialogOpen(isOpen); }}>

@@ -89,7 +89,7 @@
   .ProseMirror {
     table {
       border-collapse: collapse;
-      table-layout: fixed;
+      table-layout: fixed; /* Mantiene el ancho de las columnas fijo */
       width: 100%;
       margin: 0;
       overflow: hidden;
@@ -103,6 +103,7 @@
       vertical-align: top;
       box-sizing: border-box;
       position: relative;
+      overflow-wrap: break-word; /* Ajusta el texto para que no desborde la celda */
     }
 
     th {
@@ -137,11 +138,35 @@
       overflow-x: auto;
     }
 
+    /* NUEVO: Muestra el cursor de redimensión cuando es posible */
     .resize-cursor {
-      cursor: ew-resize;
       cursor: col-resize;
     }
+    
+    /* --- INICIO: Estilos para tablas invisibles --- */
+    
+    /* En el editor, las tablas invisibles tienen bordes punteados para poder editarlas */
+    table[data-invisible='true'] td,
+    table[data-invisible='true'] th {
+      border: 1px dashed hsl(var(--muted-foreground) / 0.5);
+    }
+
+    /* Cuando la tabla invisible está seleccionada, los bordes se resaltan */
+    .ProseMirror-selectednode table[data-invisible='true'] td,
+    .ProseMirror-selectednode table[data-invisible='true'] th {
+        border: 1px dashed hsl(var(--primary));
+    }
+    /* --- FIN: Estilos para tablas invisibles --- */
   }
+
+  /* --- INICIO: Oculta los bordes de las tablas invisibles en la VISTA PÚBLICA --- */
+  .prose table[data-invisible='true'],
+  .prose table[data-invisible='true'] td,
+  .prose table[data-invisible='true'] th {
+    border: none;
+    background-color: transparent;
+  }
+  /* --- FIN --- */
 }
 
 .glass-effect {
