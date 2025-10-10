@@ -37,11 +37,11 @@ const InterstitialAd = () => {
             }, 1000);
         } else if (adConfig !== null) {
             hideAd();
-            navigateToUrl();
+            // Ya no llamamos a navigateToUrl aquí en la lógica de overlay
         }
 
         return () => clearInterval(timer);
-    }, [isAdVisible, adConfig, adContext, hideAd, navigateToUrl]);
+    }, [isAdVisible, adConfig, adContext, hideAd]);
 
     if (!adContext) {
         return null;
@@ -49,7 +49,7 @@ const InterstitialAd = () => {
     
     const handleSkip = () => {
         hideAd();
-        navigateToUrl();
+        // Ya no es necesario navegar desde aquí
     };
 
     const onOpenChange = (open) => {
@@ -62,14 +62,15 @@ const InterstitialAd = () => {
 
     return (
         <Dialog open={shouldBeOpen} onOpenChange={onOpenChange}>
-            <DialogContent 
-              showCloseButton={false} 
-              className={cn(
-                "bg-gray-800 border-2 border-yellow-400 text-center",
-                "p-4 sm:p-8",
-                "w-[95vw] sm:max-w-lg" // Ancho responsivo
-              )}
-            >
+                <DialogContent
+                onPointerDownOutside={(e) => e.preventDefault()} 
+                showCloseButton={false}
+                className={cn(
+                    "bg-gray-800 border-2 border-yellow-400 text-center",
+                    "p-4 sm:p-8",
+                    "w-[95vw] md:w-[80vw] lg:max-w-6xl"
+                )}
+                >
                 <DialogHeader>
                   <DialogTitle className="text-2xl sm:text-3xl font-bold text-white">Un Anuncio Antes de Continuar</DialogTitle>
                   <DialogDescription className="text-muted-foreground mt-2">

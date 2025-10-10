@@ -24,30 +24,23 @@ export const AdProvider = ({ children }) => {
 
     const showAd = (url) => {
         if (adsConfig?.interstitial?.visible) {
-            setAdUrl(url);
+            setAdUrl(url); // Opcional, podrías quitarlo si ya no lo usas
             setIsAdVisible(true);
-            return true; // Indicates that an ad will be shown
         }
-        return false; // Indicates no ad will be shown, proceed with navigation
     };
 
     const hideAd = () => {
         setIsAdVisible(false);
     };
 
-    const navigateToUrl = () => {
-        if (adUrl) {
-            navigate(adUrl);
-            setAdUrl(null);
-        }
-    };
+
 
     const value = {
         isAdVisible,
         adUrl,
         showAd,
         hideAd,
-        navigateToUrl,
+        
     };
 
     return <AdContext.Provider value={value}>{children}</AdContext.Provider>;

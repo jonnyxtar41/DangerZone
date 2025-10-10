@@ -7,10 +7,7 @@ const AdLink = ({ to, children, className, ...props }) => {
     const navigate = useNavigate();
 
     const handleClick = (e) => {
-        // showAd returns true if an ad will be shown, false otherwise
-        if (showAd(to)) {
-            e.preventDefault(); // Prevent navigation only if an ad is shown
-        }
+        showAd(to);
     };
 
     return (
