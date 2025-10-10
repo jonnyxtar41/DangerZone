@@ -51,7 +51,7 @@ const ManageSuggestions = () => {
             toast({ title: 'Sugerencia eliminada', description: 'La sugerencia ha sido eliminada permanentemente.' });
             setSuggestions(prev => prev.filter(s => s.id !== suggestionId));
         } catch (error) {
-             toast({ title: 'Error al eliminar', description: error.message, variant: 'destructive' });
+            toast({ title: 'Error al eliminar', description: error.message, variant: 'destructive' });
         }
     };
 
@@ -92,7 +92,7 @@ const ManageSuggestions = () => {
                                         <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" /> {formatDistanceToNow(new Date(suggestion.created_at), { addSuffix: true, locale: es })}</span>
                                     </div>
                                 </div>
-                                 <AlertDialog>
+                                <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <Button variant="destructive" size="icon" className="h-8 w-8 flex-shrink-0">
                                             <Trash2 className="w-4 h-4" />

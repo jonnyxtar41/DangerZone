@@ -1,261 +1,273 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 70% 50%;
-    --chart-3: 340 70% 50%;
-    --chart-4: 40 70% 50%;
-    --chart-5: 280 70% 50%;
-  }
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-  }
-}
+    @layer base {
+      :root {
+        --background: 222.2 84% 4.9%;
+        --foreground: 210 40% 98%;
+        --card: 222.2 84% 4.9%;
+        --card-foreground: 210 40% 98%;
+        --popover: 222.2 84% 4.9%;
+        --popover-foreground: 210 40% 98%;
+        --primary: 217.2 91.2% 59.8%;
+        --primary-foreground: 222.2 47.4% 11.2%;
+        --secondary: 217.2 32.6% 17.5%;
+        --secondary-foreground: 210 40% 98%;
+        --muted: 217.2 32.6% 17.5%;
+        --muted-foreground: 215 20.2% 65.1%;
+        --accent: 217.2 32.6% 17.5%;
+        --accent-foreground: 210 40% 98%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 210 40% 98%;
+        --border: 217.2 32.6% 17.5%;
+        --input: 217.2 32.6% 17.5%;
+        --ring: 224.3 76.3% 48%;
+        --chart-1: 220 70% 50%;
+        --chart-2: 160 70% 50%;
+        --chart-3: 340 70% 50%;
+        --chart-4: 40 70% 50%;
+        --chart-5: 280 70% 50%;
+      }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
-
-  .prose ::selection {
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-  }
-
-  .prose {
-    table {
-      @apply table-auto w-full my-4 border-collapse border border-border;
+      .dark {
+        --background: 222.2 84% 4.9%;
+        --foreground: 210 40% 98%;
+        --card: 222.2 84% 4.9%;
+        --card-foreground: 210 40% 98%;
+        --popover: 222.2 84% 4.9%;
+        --popover-foreground: 210 40% 98%;
+        --primary: 217.2 91.2% 59.8%;
+        --primary-foreground: 222.2 47.4% 11.2%;
+        --secondary: 217.2 32.6% 17.5%;
+        --secondary-foreground: 210 40% 98%;
+        --muted: 217.2 32.6% 17.5%;
+        --muted-foreground: 215 20.2% 65.1%;
+        --accent: 217.2 32.6% 17.5%;
+        --accent-foreground: 210 40% 98%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 210 40% 98%;
+        --border: 217.2 32.6% 17.5%;
+        --input: 217.2 32.6% 17.5%;
+        --ring: 224.3 76.3% 48%;
+      }
     }
 
-    table th,
-    table td {
-      @apply border border-border px-4 py-2 text-left;
+    @layer base {
+      * {
+        @apply border-border;
+      }
+
+      body {
+        @apply bg-background text-foreground;
+      }
+
+      .prose ::selection {
+        background-color: hsl(var(--primary));
+        color: hsl(var(--primary-foreground));
+      }
+
+      .prose {
+        table {
+          @apply table-auto w-full my-4 border-collapse border border-border;
+        }
+
+        table th,
+        table td {
+          @apply border border-border px-4 py-2 text-left;
+        }
+
+        table th {
+          @apply bg-muted font-bold;
+        }
+
+        table p {
+          @apply my-0;
+        }
+      }
+
+      .ProseMirror {
+        table {
+          border-collapse: collapse;
+          table-layout: fixed;
+          /* Mantiene el ancho de las columnas fijo */
+          width: 100%;
+          margin: 0;
+          overflow: hidden;
+        }
+
+        td,
+        th {
+          min-width: 1em;
+          border: 2px solid #ced4da;
+          padding: 3px 5px;
+          vertical-align: top;
+          box-sizing: border-box;
+          position: relative;
+          overflow-wrap: break-word;
+          /* Ajusta el texto para que no desborde la celda */
+        }
+
+        th {
+          font-weight: bold;
+          text-align: left;
+          background-color: hsl(var(--muted));
+        }
+
+        .selectedCell:after {
+          z-index: 2;
+          position: absolute;
+          content: "";
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          background: rgba(200, 200, 255, 0.4);
+          pointer-events: none;
+        }
+
+        .column-resize-handle {
+          position: absolute;
+          right: -2px;
+          top: 0;
+          bottom: -2px;
+          width: 4px;
+          background-color: #adf;
+          pointer-events: none;
+        }
+
+        .tableWrapper {
+          overflow-x: auto;
+        }
+
+        /* NUEVO: Muestra el cursor de redimensión cuando es posible */
+        .resize-cursor {
+          cursor: col-resize;
+        }
+
+        /* --- INICIO: Estilos para tablas invisibles --- */
+
+        /* En el editor, las tablas invisibles tienen bordes punteados para poder editarlas */
+        table[data-invisible='true'] td,
+        table[data-invisible='true'] th {
+          border: 1px dashed hsl(var(--muted-foreground) / 0.5);
+        }
+
+        /* Cuando la tabla invisible está seleccionada, los bordes se resaltan */
+        .ProseMirror-selectednode table[data-invisible='true'] td,
+        .ProseMirror-selectednode table[data-invisible='true'] th {
+          border: 1px dashed hsl(var(--primary));
+        }
+
+        /* --- FIN: Estilos para tablas invisibles --- */
+      }
+
+      /* --- INICIO: Oculta los bordes de las tablas invisibles en la VISTA PÚBLICA --- */
+      .prose table[data-invisible='true'],
+      .prose table[data-invisible='true'] td,
+      .prose table[data-invisible='true'] th {
+        border: none;
+        background-color: transparent;
+      }
+
+      /* --- FIN --- */
     }
 
-    table th {
-      @apply bg-muted font-bold;
+    .glass-effect {
+      background-color: rgba(28, 28, 40, 0.5);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    table p {
-      @apply my-0;
+    .glass-effect-aside {
+      background-color: rgba(10, 10, 20, 0.8);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
-  }
 
-  .ProseMirror {
-    table {
-      border-collapse: collapse;
-      table-layout: fixed; /* Mantiene el ancho de las columnas fijo */
-      width: 100%;
+    .admin-sidebar {
+      background-color: #111827;
+      color: #D1D5DB;
+    }
+
+    .admin-sidebar-link {
+      color: #D1D5DB;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .admin-sidebar-link:hover {
+      background-color: #1F2937;
+      color: #FFFFFF;
+    }
+
+    .admin-sidebar-link.active {
+      background-color: #2563EB;
+      color: #FFFFFF;
+    }
+
+    .admin-sidebar-link.active .lucide {
+      color: #FFFFFF;
+    }
+
+    .ProseMirror-selectednode {
+      outline: 3px solid hsl(var(--primary));
+    }
+
+    .ProseMirror ::selection {
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+    }
+
+    /* --- ESTILOS PARA EL EDITOR DE TEXTO --- */
+
+    /* Soluciona el espaciado extra en las celdas de la tabla */
+    .ProseMirror td p {
       margin: 0;
-      overflow: hidden;
     }
 
-    td,
-    th {
-      min-width: 1em;
-      border: 2px solid #ced4da;
-      padding: 3px 5px;
-      vertical-align: top;
-      box-sizing: border-box;
-      position: relative;
-      overflow-wrap: break-word; /* Ajusta el texto para que no desborde la celda */
-    }
-
-    th {
-      font-weight: bold;
-      text-align: left;
-      background-color: hsl(var(--muted));
-    }
-
-    .selectedCell:after {
-      z-index: 2;
-      position: absolute;
-      content: "";
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      background: rgba(200, 200, 255, 0.4);
-      pointer-events: none;
-    }
-
-    .column-resize-handle {
-      position: absolute;
-      right: -2px;
-      top: 0;
-      bottom: -2px;
+    /* Hace visibles los manejadores para redimensionar columnas de la tabla */
+    .ProseMirror .column-resize-handle {
+      background-color: hsl(var(--primary));
       width: 4px;
-      background-color: #adf;
-      pointer-events: none;
     }
 
-    .tableWrapper {
-      overflow-x: auto;
+    /* --- Alineación de Imágenes --- */
+
+    /* Contenedor de la imagen fuera de una tabla */
+    .resizable-image-wrapper[data-align="left"] {
+      margin-right: auto;
     }
 
-    /* NUEVO: Muestra el cursor de redimensión cuando es posible */
-    .resize-cursor {
-      cursor: col-resize;
-    }
-    
-    /* --- INICIO: Estilos para tablas invisibles --- */
-    
-    /* En el editor, las tablas invisibles tienen bordes punteados para poder editarlas */
-    table[data-invisible='true'] td,
-    table[data-invisible='true'] th {
-      border: 1px dashed hsl(var(--muted-foreground) / 0.5);
+    .resizable-image-wrapper[data-align="center"] {
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    /* Cuando la tabla invisible está seleccionada, los bordes se resaltan */
-    .ProseMirror-selectednode table[data-invisible='true'] td,
-    .ProseMirror-selectednode table[data-invisible='true'] th {
-        border: 1px dashed hsl(var(--primary));
+    .resizable-image-wrapper[data-align="right"] {
+      margin-left: auto;
     }
-    /* --- FIN: Estilos para tablas invisibles --- */
-  }
 
-  /* --- INICIO: Oculta los bordes de las tablas invisibles en la VISTA PÚBLICA --- */
-  .prose table[data-invisible='true'],
-  .prose table[data-invisible='true'] td,
-  .prose table[data-invisible='true'] th {
-    border: none;
-    background-color: transparent;
-  }
-  /* --- FIN --- */
-}
+    /* Contenedor de la imagen DENTRO de una tabla */
+    .ProseMirror td .resizable-image-wrapper {
+      display: flex;
+      /* Permite centrar el contenido interno */
+    }
 
-.glass-effect {
-  background-color: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+    .ProseMirror td .resizable-image-wrapper>div {
+      margin: 0 !important;
+      /* Resetea los márgenes automáticos dentro de la tabla */
+    }
 
-.admin-sidebar {
-  background-color: #111827;
-  color: #D1D5DB;
-}
+    .ProseMirror td .resizable-image-wrapper[data-align="left"] {
+      justify-content: flex-start;
+    }
 
-.admin-sidebar-link {
-  color: #D1D5DB;
-  transition: background-color 0.2s, color 0.2s;
-}
+    .ProseMirror td .resizable-image-wrapper[data-align="center"] {
+      justify-content: center;
+    }
 
-.admin-sidebar-link:hover {
-  background-color: #1F2937;
-  color: #FFFFFF;
-}
-
-.admin-sidebar-link.active {
-  background-color: #2563EB;
-  color: #FFFFFF;
-}
-
-.admin-sidebar-link.active .lucide {
-  color: #FFFFFF;
-}
-
-.ProseMirror-selectednode {
-  outline: 3px solid hsl(var(--primary));
-}
-
-.ProseMirror ::selection {
-  background-color: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-}
-
-/* --- ESTILOS PARA EL EDITOR DE TEXTO --- */
-
-/* Soluciona el espaciado extra en las celdas de la tabla */
-.ProseMirror td p {
-  margin: 0;
-}
-
-/* Hace visibles los manejadores para redimensionar columnas de la tabla */
-.ProseMirror .column-resize-handle {
-  background-color: hsl(var(--primary));
-  width: 4px;
-}
-
-/* --- Alineación de Imágenes --- */
-
-/* Contenedor de la imagen fuera de una tabla */
-.resizable-image-wrapper[data-align="left"] {
-  margin-right: auto;
-}
-
-.resizable-image-wrapper[data-align="center"] {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.resizable-image-wrapper[data-align="right"] {
-  margin-left: auto;
-}
-
-/* Contenedor de la imagen DENTRO de una tabla */
-.ProseMirror td .resizable-image-wrapper {
-  display: flex;
-  /* Permite centrar el contenido interno */
-}
-
-.ProseMirror td .resizable-image-wrapper>div {
-  margin: 0 !important;
-  /* Resetea los márgenes automáticos dentro de la tabla */
-}
-
-.ProseMirror td .resizable-image-wrapper[data-align="left"] {
-  justify-content: flex-start;
-}
-
-.ProseMirror td .resizable-image-wrapper[data-align="center"] {
-  justify-content: center;
-}
-
-.ProseMirror td .resizable-image-wrapper[data-align="right"] {
-  justify-content: flex-end;
-}
+    .ProseMirror td .resizable-image-wrapper[data-align="right"] {
+      justify-content: flex-end;
+    }
+  

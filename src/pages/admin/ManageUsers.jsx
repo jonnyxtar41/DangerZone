@@ -24,7 +24,7 @@ const callAdminFunction = async (action, payload, session) => {
     if (response.error) {
         throw new Error(response.error.message);
     }
-    
+
     let responseData = response.data;
     if (typeof responseData === 'string') {
         try {
@@ -33,9 +33,9 @@ const callAdminFunction = async (action, payload, session) => {
             // Not JSON
         }
     }
-    
+
     if (responseData && responseData.error) {
-         throw new Error(responseData.error.message || 'Error en la función de administrador.');
+        throw new Error(responseData.error.message || 'Error en la función de administrador.');
     }
 
     return responseData;
@@ -61,7 +61,7 @@ const ManageUsers = () => {
     const [isEditPasswordDialogOpen, setEditPasswordDialogOpen] = useState(false);
     const [isEditRoleDialogOpen, setEditRoleDialogOpen] = useState(false);
     const [editingUserRoleId, setEditingUserRoleId] = useState('');
-    
+
     const [deleteCandidate, setDeleteCandidate] = useState(null);
 
     const fetchUsersAndRoles = useCallback(async () => {
@@ -69,7 +69,7 @@ const ManageUsers = () => {
         setLoading(true);
         try {
             const { users: authUsers } = await callAdminFunction('listUsers', {}, session);
-            
+
             const userIds = authUsers.map(u => u.id);
             const { data: userRolesData, error: rolesError } = await supabase
                 .from('user_roles')
@@ -82,7 +82,7 @@ const ManageUsers = () => {
                 const roleInfo = userRolesData?.find(r => r.user_id === user.id);
                 return { ...user, role: roleInfo?.roles };
             });
-            
+
             setUsers(usersWithRoles);
 
             const { data: rolesData, error: rolesListError } = await supabase.from('roles').select('*');
@@ -98,7 +98,7 @@ const ManageUsers = () => {
 
     useEffect(() => {
         fetchUsersAndRoles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleAddUser = async () => {
@@ -127,10 +127,10 @@ const ManageUsers = () => {
                 }
             }
         } catch (error) {
-             toast({ title: 'Error al crear usuario', description: error.message, variant: 'destructive' });
+            toast({ title: 'Error al crear usuario', description: error.message, variant: 'destructive' });
         }
     };
-    
+
     const attemptDelete = async (user) => {
         try {
             const { hasPosts } = await callAdminFunction('checkUserDependencies', { userId: user.id }, session);
@@ -161,13 +161,13 @@ const ManageUsers = () => {
             return;
         }
         try {
-             const { user } = await callAdminFunction('updateUser', { userId: editingUser.id, updates: { password: newPassword } }, session);
-             toast({ title: 'Contraseña actualizada', description: `La contraseña para ${user.email} ha sido actualizada.` });
-             setNewPassword('');
-             setEditingUser(null);
-             setEditPasswordDialogOpen(false);
-        } catch(error) {
-             toast({ title: 'Error al actualizar contraseña', description: error.message, variant: 'destructive' });
+            const { user } = await callAdminFunction('updateUser', { userId: editingUser.id, updates: { password: newPassword } }, session);
+            toast({ title: 'Contraseña actualizada', description: `La contraseña para ${user.email} ha sido actualizada.` });
+            setNewPassword('');
+            setEditingUser(null);
+            setEditPasswordDialogOpen(false);
+        } catch (error) {
+            toast({ title: 'Error al actualizar contraseña', description: error.message, variant: 'destructive' });
         }
     };
 
@@ -212,7 +212,7 @@ const ManageUsers = () => {
                                 <Label htmlFor="password">Contraseña</Label>
                                 <Input id="password" type={showNewUserPassword ? 'text' : 'password'} value={newUserPassword} onChange={(e) => setNewUserPassword(e.target.value)} />
                                 <Button variant="ghost" size="icon" className="absolute right-1 top-[26px] h-8 w-8" onClick={() => setShowNewUserPassword(!showNewUserPassword)}>
-                                    {showNewUserPassword ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
+                                    {showNewUserPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </Button>
                             </div>
                             <div className="space-y-2">
@@ -278,7 +278,7 @@ const ManageUsers = () => {
                                         <Label htmlFor="new-password">Nueva Contraseña</Label>
                                         <Input id="new-password" type={showEditPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
                                         <Button variant="ghost" size="icon" className="absolute right-1 top-[42px] h-8 w-8" onClick={() => setShowEditPassword(!showEditPassword)}>
-                                            {showEditPassword ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
+                                            {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                         </Button>
                                     </div>
                                     <DialogFooter>
@@ -295,21 +295,21 @@ const ManageUsers = () => {
                                     </Button>
                                 </AlertDialogTrigger>
                                 {deleteCandidate && deleteCandidate.id === user.id && (
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            {deleteCandidate.hasPosts
-                                                ? `Este usuario tiene posts asociados. Si lo eliminas, los posts permanecerán pero no tendrán un autor asignado. ¿Deseas continuar?`
-                                                : `Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario ${user.email}.`
-                                            }
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={handleConfirmDelete}>Eliminar</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                {deleteCandidate.hasPosts
+                                                    ? `Este usuario tiene posts asociados. Si lo eliminas, los posts permanecerán pero no tendrán un autor asignado. ¿Deseas continuar?`
+                                                    : `Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario ${user.email}.`
+                                                }
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleConfirmDelete}>Eliminar</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
                                 )}
                             </AlertDialog>
                         </div>
