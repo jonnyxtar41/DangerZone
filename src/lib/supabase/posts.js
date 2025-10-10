@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/customSupabaseClient';
 import { logActivity } from '@/lib/supabase/log';
 
@@ -23,6 +22,7 @@ export const getPosts = async (options = {}) => {
             excerpt, date, image_description, main_image_url, slug,
             show_author, custom_author_name, show_date, status, user_id,
             section_id, is_premium, price, currency, download, published_at,
+            is_discount_active, discount_percentage, comments_enabled, custom_fields,
             sections!inner(id, name, slug),
             categories!left(id, name, gradient, section_id),
             subcategories (id, name)
@@ -33,7 +33,6 @@ export const getPosts = async (options = {}) => {
     if (includePending) statuses.push('pending_approval');
     if (includeScheduled) statuses.push('scheduled');
     
-    // Public view should not see scheduled posts before their time
     if (!includeScheduled) {
         query = query.or(`status.neq.scheduled,and(status.eq.scheduled,published_at.lte.now())`);
     }
@@ -239,4 +238,3 @@ export const getDownloadablePosts = async (count) => {
 
   return data;
 };
-  

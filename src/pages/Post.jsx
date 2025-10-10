@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
@@ -11,6 +10,7 @@ import AdBlock from '@/components/AdBlock';
 import AdLink from '@/components/AdLink';
 import { useDownloadModal } from '@/context/DownloadModalContext';
 import parse, { domToReact } from 'html-react-parser';
+import CommentsSection from '@/components/CommentsSection';
 
 const PostCard = ({ post, section }) => (
   <AdLink to={`/${section}/${post.slug}`} className="block group">
@@ -84,7 +84,6 @@ const Post = ({ section }) => {
     }
 
     if (post.is_premium) {
-          // Si es premium, redirige a la página de pago
           navigate(`/checkout/${post.slug}`);
           return;
      }
@@ -98,10 +97,6 @@ const Post = ({ section }) => {
          return;
       }
       
-
-
-
-
       window.open(downloadUrl, '_blank', 'noopener,noreferrer');
       toast({
         title: "📥 ¡Descarga iniciada!",
@@ -256,6 +251,20 @@ const Post = ({ section }) => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
+                {post.custom_fields && post.custom_fields.length > 0 && (
+                    <div className="my-8 p-6 glass-effect rounded-lg">
+                        <h3 className="text-xl font-bold mb-4 text-foreground">Detalles Adicionales</h3>
+                        <ul className="space-y-2">
+                            {post.custom_fields.map((field, index) => field.key && (
+                                <li key={index} className="flex justify-between border-b border-border/50 pb-2">
+                                    <span className="font-semibold text-muted-foreground">{field.key}:</span>
+                                    <span className="text-right text-foreground">{field.value}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+                
                 <div className="prose prose-invert prose-lg max-w-none text-muted-foreground prose-headings:text-foreground prose-h2:text-3xl prose-p:leading-relaxed prose-a:text-link hover:prose-a:text-link-hover prose-img:rounded-xl">
                   {post.content && parse(post.content, parseOptions)}
                 </div>
@@ -273,6 +282,7 @@ const Post = ({ section }) => {
                     )}
                   </div>
                 </div>
+                {post.comments_enabled && <CommentsSection postId={post.id} />}
               </motion.div>
             </article>
 
@@ -327,4 +337,3 @@ const Post = ({ section }) => {
 };
 
 export default Post;
-  

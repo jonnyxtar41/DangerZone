@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -6,14 +5,13 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { DollarSign, Percent, CalendarClock, Save, Book, Trash2, Loader2 } from 'lucide-react';
+import { DollarSign, Percent, CalendarClock, Save, Book, Trash2, Loader2, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { getTemplates, saveTemplate, deleteTemplate } from '@/lib/supabase/templates';
 
 const PostFormSidebar = ({
-    // ... existing props
     hasDownload, setHasDownload,
     downloadType, setDownloadType,
     downloadUrl, setDownloadUrl,
@@ -26,18 +24,16 @@ const PostFormSidebar = ({
     isPremium, setIsPremium,
     price, setPrice, currency, setCurrency,
     isDiscountActive, setIsDiscountActive,
-discountPercentage, setDiscountPercentage,
-    // New props for scheduling and templates
+    discountPercentage, setDiscountPercentage,
     isScheduled, setIsScheduled,
     publishedAt, setPublishedAt,
     onLoadTemplate,
     getTemplateData,
+    commentsEnabled, setCommentsEnabled, // New prop for comments
 }) => {
     const { permissions } = useAuth();
     const { toast } = useToast();
     const canManageContent = permissions?.['manage-content'];
-
-    // State for templates management
     const [templates, setTemplates] = useState([]);
     const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
     const [newTemplateName, setNewTemplateName] = useState('');
@@ -86,14 +82,14 @@ discountPercentage, setDiscountPercentage,
             {canManageContent && (
                 <>
                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold">Programación</h3>
+                        <h3 className="text-lg font-semibold">Publicación</h3>
                         <div className="flex items-center justify-between">
                             <Label htmlFor="is-scheduled">Programar Publicación</Label>
                             <Switch id="is-scheduled" checked={isScheduled} onCheckedChange={setIsScheduled} />
                         </div>
                         {isScheduled && (
                             <div className="space-y-2">
-                                <Label htmlFor="published-at">Fecha y Hora de Publicación</Label>
+                                <Label htmlFor="published-at">Fecha y Hora</Label>
                                 <Input
                                     id="published-at"
                                     type="datetime-local"
@@ -103,9 +99,13 @@ discountPercentage, setDiscountPercentage,
                                 />
                             </div>
                         )}
+                         <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                            <Label htmlFor="comments-enabled" className="flex items-center gap-2"><MessageSquare className="w-4 h-4"/>Habilitar Comentarios</Label>
+                            <Switch id="comments-enabled" checked={commentsEnabled} onCheckedChange={setCommentsEnabled} />
+                        </div>
                     </div>
                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold">Plantillas de Contenido</h3>
+                        <h3 className="text-lg font-semibold">Plantillas</h3>
                         <div className="space-y-2">
                             <Select onValueChange={(templateId) => onLoadTemplate(templates.find(t => t.id === parseInt(templateId)))}>
                                 <SelectTrigger className="bg-input">
@@ -141,25 +141,25 @@ discountPercentage, setDiscountPercentage,
                 </div>
                 {showAuthor && (
                     <div>
-                        <Label htmlFor="custom-author-name">Nombre de Autor Personalizado</Label>
-                        <Input id="custom-author-name" value={customAuthorName} onChange={(e) => setCustomAuthorName(e.target.value)} placeholder="Dejar en blanco para usar el predeterminado" className="mt-1 bg-input" />
+                        <Label htmlFor="custom-author-name">Nombre Personalizado</Label>
+                        <Input id="custom-author-name" value={customAuthorName} onChange={(e) => setCustomAuthorName(e.target.value)} placeholder="Por defecto: email del autor" className="mt-1 bg-input" />
                     </div>
                 )}
             </div>
 
             <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Opciones de Visualización</h3>
+                <h3 className="text-lg font-semibold">Visualización del Post</h3>
                 <div className="flex items-center justify-between">
-                    <Label htmlFor="show-date">Mostrar Fecha de Publicación</Label>
+                    <Label htmlFor="show-date">Mostrar Fecha</Label>
                     <Switch id="show-date" checked={showDate} onCheckedChange={setShowDate} />
                 </div>
                 <div className="flex items-center justify-between">
-                    <Label htmlFor="show-main-image">Mostrar Imagen Principal en Post</Label>
+                    <Label htmlFor="show-main-image">Mostrar Imagen Principal</Label>
                     <Switch id="show-main-image" checked={showMainImageInPost} onCheckedChange={setShowMainImageInPost} />
                 </div>
                 {showMainImageInPost && (
                     <div>
-                        <Label>Tamaño de Imagen en Post</Label>
+                        <Label>Tamaño de Imagen</Label>
                         <Select value={mainImageSizeInPost} onValueChange={setMainImageSizeInPost}>
                             <SelectTrigger className="mt-1 bg-input"><SelectValue /></SelectTrigger>
                             <SelectContent>
@@ -179,7 +179,7 @@ discountPercentage, setDiscountPercentage,
                     <Switch id="has-download" checked={hasDownload} onCheckedChange={setHasDownload} />
                 </div>
                 {hasDownload && (
-                     <div className="space-y-4">
+                     <div className="space-y-4 pt-4">
                         <RadioGroup value={downloadType} onValueChange={setDownloadType}>
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="url" id="url" />
@@ -191,24 +191,12 @@ discountPercentage, setDiscountPercentage,
                             </div>
                         </RadioGroup>
                         {downloadType === 'url' ? (
-                            <Input
-                                type="text"
-                                placeholder="https://ejemplo.com/descarga"
-                                value={downloadUrl}
-                                onChange={(e) => setDownloadUrl(e.target.value)}
-                                className="bg-input"
-                            />
+                            <Input type="text" placeholder="https://ejemplo.com/descarga" value={downloadUrl} onChange={(e) => setDownloadUrl(e.target.value)} className="bg-input"/>
                         ) : (
                             <div>
-                                <Input
-                                    type="file"
-                                    onChange={(e) => setDownloadFile(e.target.files[0])}
-                                    className="bg-input"
-                                />
+                                <Input type="file" onChange={(e) => setDownloadFile(e.target.files[0])} className="bg-input"/>
                                 {initialData?.download?.type === 'file' && initialData?.download?.url && (
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                        Archivo actual: {initialData.download.url.split('/').pop()}. Sube uno nuevo para reemplazarlo.
-                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-1">Archivo actual: {initialData.download.url.split('/').pop()}.</p>
                                 )}
                             </div>
                         )}
@@ -276,4 +264,3 @@ discountPercentage, setDiscountPercentage,
 };
 
 export default PostFormSidebar;
-  

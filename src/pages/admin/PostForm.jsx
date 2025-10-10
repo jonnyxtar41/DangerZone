@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
@@ -6,17 +5,15 @@ import { Button } from '@/components/ui/button';
 import PostFormInputs from '@/pages/admin/post-form/PostFormInputs';
 import PostFormSidebar from '@/pages/admin/post-form/PostFormSidebar';
 import PostFormSeo from '@/pages/admin/post-form/PostFormSeo';
+import PostFormCustomFields from '@/pages/admin/post-form/PostFormCustomFields';
 import PostPreview from '@/pages/admin/post-form/PostPreview';
 import { Save, Send, PlusCircle, Trash2, Edit, Eye, CalendarClock } from 'lucide-react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { getCategories } from '@/lib/supabase/categories';
 import { getSubcategories } from '@/lib/supabase/subcategories';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/customSupabaseClient';
 import TiptapEditor from '@/components/TiptapEditor';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { deletePost } from '@/lib/supabase/posts';
 import { uploadDownloadableAsset } from '@/lib/supabase/assets';
@@ -54,12 +51,13 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
     const [isDiscountActive, setIsDiscountActive] = useState(initialData.is_discount_active || false);
     const [discountPercentage, setDiscountPercentage] = useState(initialData.discount_percentage || '');
 
-    // New feature states
+    // New features state
     const [view, setView] = useState('edit'); // 'edit' or 'preview'
     const [isScheduled, setIsScheduled] = useState(!!initialData.published_at && new Date(initialData.published_at) > new Date());
     const [publishedAt, setPublishedAt] = useState(initialData.published_at ? new Date(initialData.published_at).toISOString().slice(0, 16) : '');
-    
-    // UI/Logic states
+    const [customFields, setCustomFields] = useState(initialData.custom_fields || []);
+    const [commentsEnabled, setCommentsEnabled] = useState(initialData.comments_enabled || false);
+
     const [availableCategories, setAvailableCategories] = useState([]);
     const [availableSubcategories, setAvailableSubcategories] = useState([]);
     const [isSaved, setIsSaved] = useState(false);
@@ -71,10 +69,9 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
     const isEditing = !!initialData.id;
     const isAdmin = permissions?.['manage-content'];
 
-    // Collect all data for preview and templates
     const getPostData = useCallback(() => ({
-        title, postSectionId, postCategoryId, postSubcategoryId, excerpt, content, main_image_url: mainImagePreview, meta_title: metaTitle, meta_description: metaDescription, slug, keywords, custom_author_name: customAuthorName, show_author: showAuthor, show_date: showDate, show_main_image_in_post: showMainImageInPost, main_image_size_in_post: mainImageSizeInPost, hasDownload, downloadType, downloadUrl, isPremium, price, currency, isDiscountActive, discountPercentage, published_at: publishedAt, isScheduled
-    }), [title, postSectionId, postCategoryId, postSubcategoryId, excerpt, content, mainImagePreview, metaTitle, metaDescription, slug, keywords, customAuthorName, showAuthor, showDate, showMainImageInPost, mainImageSizeInPost, hasDownload, downloadType, downloadUrl, isPremium, price, currency, isDiscountActive, discountPercentage, publishedAt, isScheduled]);
+        title, postSectionId, postCategoryId, postSubcategoryId, excerpt, content, main_image_url: mainImagePreview, meta_title: metaTitle, meta_description: metaDescription, slug, keywords, custom_author_name: customAuthorName, show_author: showAuthor, show_date: showDate, show_main_image_in_post: showMainImageInPost, main_image_size_in_post: mainImageSizeInPost, hasDownload, downloadType, downloadUrl, isPremium, price, currency, isDiscountActive, discountPercentage, published_at: publishedAt, isScheduled, custom_fields: customFields, comments_enabled: commentsEnabled
+    }), [title, postSectionId, postCategoryId, postSubcategoryId, excerpt, content, mainImagePreview, metaTitle, metaDescription, slug, keywords, customAuthorName, showAuthor, showDate, showMainImageInPost, mainImageSizeInPost, hasDownload, downloadType, downloadUrl, isPremium, price, currency, isDiscountActive, discountPercentage, publishedAt, isScheduled, customFields, commentsEnabled]);
 
     const handleLoadTemplate = (template) => {
         if (!template || !template.content) return;
@@ -85,7 +82,6 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
         setPostSubcategoryId(data.postSubcategoryId || '');
         setExcerpt(data.excerpt || '');
         setContent(data.content || '');
-        // ... (set other fields from template)
         toast({ title: `Plantilla "${template.name}" cargada` });
     };
 
@@ -111,8 +107,6 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
             return;
         }
 
-        // ... (existing validations for title, category, price)
-
         let downloadData = null;
         if (hasDownload) {
              let finalDownloadUrl = downloadUrl;
@@ -133,11 +127,34 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
         }
 
         const postData = {
-            ...getPostData(),
+            title,
+            section_id: postSectionId,
+            category_id: postCategoryId,
+            subcategory_id: postSubcategoryId,
+            excerpt,
+            content,
+            main_image_url: mainImagePreview,
+            meta_title: metaTitle,
+            meta_description: metaDescription,
+            slug,
+            keywords,
+            custom_author_name: customAuthorName,
+            show_author: showAuthor,
+            show_date: showDate,
+            show_main_image_in_post: showMainImageInPost,
+            main_image_size_in_post: mainImageSizeInPost,
+            is_premium: isPremium,
+            price,
+            currency,
+            is_discount_active: isDiscountActive,
+            discount_percentage: discountPercentage,
+            custom_fields: customFields.filter(f => f.key && f.value),
+            comments_enabled: commentsEnabled,
             status,
             published_at: isScheduled ? new Date(publishedAt).toISOString() : (status === 'published' ? new Date().toISOString() : null),
             author: user.email,
-            download: downloadData
+            download: downloadData,
+            user_id: user.id
         };
 
         const success = await onSave(postData, isEditing, initialData);
@@ -146,8 +163,6 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
         else if (success && isEditing) navigate('/control-panel-7d8a2b3c4f5e/dashboard');
     };
     
-    // ... (All other functions like handleDeletePost, resetForm, handleAiAction, useEffects remain largely the same)
-
     useEffect(() => {
         const fetchCategories = async () => {
             if (postSectionId) {
@@ -205,13 +220,9 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
     const handleAiAction = useCallback(async (action, promptOverride = '') => { /* ... existing AI logic ... */ }, [toast, title, editorRef]);
     const handleGenerateContentClick = () => setIsAiPromptOpen(true);
 
-
     if (isSaved && !isEditing) {
         return (
-            <motion.div
-                initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }}
-                className="text-center py-20 glass-effect rounded-lg"
-            >
+            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20 glass-effect rounded-lg">
                 <h2 className="text-3xl font-bold mb-4">¡Recurso Guardado!</h2>
                 <p className="text-lg text-gray-300 mb-8">El recurso ha sido guardado correctamente.</p>
                 <Button size="lg" onClick={resetForm}><PlusCircle className="mr-2 h-5 w-5" />Añadir otro recurso</Button>
@@ -240,6 +251,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
                                 excerpt={excerpt} setExcerpt={setExcerpt} onAiAction={handleAiAction} isAiLoading={isAiLoading}
                             />
                             <TiptapEditor content={content} onChange={setContent} onAiAction={handleAiAction} onGenerateContent={handleGenerateContentClick} getEditor={(editor) => { editorRef.current = editor; }} />
+                             <PostFormCustomFields customFields={customFields} setCustomFields={setCustomFields} />
                         </div>
                         <PostFormSidebar
                             hasDownload={hasDownload} setHasDownload={setHasDownload}
@@ -259,6 +271,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
                             publishedAt={publishedAt} setPublishedAt={setPublishedAt}
                             onLoadTemplate={handleLoadTemplate}
                             getTemplateData={getPostData}
+                            commentsEnabled={commentsEnabled} setCommentsEnabled={setCommentsEnabled}
                         />
                     </div>
                     <PostFormSeo metaTitle={metaTitle} setMetaTitle={setMetaTitle} slug={slug} setSlug={setSlug} generateSlug={generateSlug} metaDescription={metaDescription} setMetaDescription={setMetaDescription} mainImagePreview={mainImagePreview} setMainImagePreview={setMainImagePreview} keywords={keywords} setKeywords={setKeywords} onAiAction={handleAiAction} isAiLoading={isAiLoading} />
@@ -310,4 +323,3 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
 };
 
 export default PostForm;
-  
