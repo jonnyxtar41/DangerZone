@@ -133,7 +133,7 @@ const TableCell = BaseTableCell.extend({
 });
 
 // --- Componente principal del editor ---
-const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aquí...", onAiAction, onGenerateContent, getEditor }) => {
+const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aquí...", onAiAction, onGenerateContent, getEditor, onInternalLink, onSuggestLinks }) => {
   const { toast } = useToast();
 
   const handleImageUpload = useCallback((file) => {
@@ -159,7 +159,7 @@ const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aqu
         openOnClick: false,
         autolink: true,
         linkOnPaste: true,
-        validate: href => /^https?:\/\//.test(href),
+        validate: href => /^https?:\/\//.test(href) || /^\//.test(href) || /^#/.test(href),
       }),
       ResizableImage.configure({
         inline: false,
@@ -222,7 +222,14 @@ const TiptapEditor = ({ content, onChange, placeholder = "Empieza a escribir aqu
 
   return (
     <div className="w-full">
-      <TiptapToolbar editor={editor} onAiAction={onAiAction} onImageUpload={handleImageUpload} onGenerateContent={onGenerateContent} />
+      <TiptapToolbar 
+        editor={editor} 
+        onAiAction={onAiAction} 
+        onImageUpload={handleImageUpload} 
+        onGenerateContent={onGenerateContent} 
+        onInternalLink={onInternalLink} 
+        onSuggestLinks={onSuggestLinks} 
+      />
       <EditorContent editor={editor} />
     </div>
   );

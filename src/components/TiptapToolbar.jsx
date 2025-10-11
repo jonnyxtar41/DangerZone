@@ -5,7 +5,8 @@ import {
   List, ListOrdered,
   Quote, Code,
   Undo, Redo,
-  Link, Image as ImageIcon, Youtube,
+  Link, Link2,
+  Image as ImageIcon, Youtube,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
   Sparkles,
   Table, Columns, Rows, Merge, Split, Trash2, PaintBucket, EyeOff
@@ -14,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from './ui/button';
 
-const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent }) => {
+const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent, onInternalLink, onSuggestLinks }) => {
   const setLink = useCallback(() => {
     if (!editor) return;
     const previousUrl = editor.getAttributes('link').href;
@@ -62,7 +63,7 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
     </Tooltip>
   );
 
-  return (
+ return (
     <div className="border border-input bg-transparent rounded-t-lg p-2 flex flex-wrap items-center gap-1">
       <ToolbarButton command="toggleBold" icon={<Bold className="w-4 h-4" />} tooltip="Negrita" isActiveCheck="bold" />
       <ToolbarButton command="toggleItalic" icon={<Italic className="w-4 h-4" />} tooltip="Cursiva" isActiveCheck="italic" />
@@ -87,8 +88,25 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
 
       <Tooltip>
         <TooltipTrigger asChild><button onMouseDown={(e) => e.preventDefault()} onClick={setLink} className={`p-2 rounded transition-colors hover:bg-accent/20 ${editor.isActive('link') ? 'is-active bg-accent text-accent-foreground' : ''}`}><Link className="w-4 h-4" /></button></TooltipTrigger>
-        <TooltipContent><p>Añadir enlace</p></TooltipContent>
+        <TooltipContent><p>Añadir enlace externo</p></TooltipContent>
       </Tooltip>
+      
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onInternalLink}
+            className="p-2 rounded transition-colors hover:bg-accent/20"
+          >
+            <Link2 className="w-4 h-4" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Enlace a otro recurso</p>
+        </TooltipContent>
+      </Tooltip>
+
       <Tooltip>
         <TooltipTrigger asChild><button onMouseDown={(e) => e.preventDefault()} onClick={handleImageClick} className="p-2 rounded transition-colors hover:bg-accent/20"><ImageIcon className="w-4 h-4" /></button></TooltipTrigger>
         <TooltipContent><p>Añadir imagen</p></TooltipContent>
@@ -198,6 +216,22 @@ const TiptapToolbar = ({ editor, onAiAction, onImageUpload, onGenerateContent })
           <DropdownMenuItem onSelect={() => onAiAction('make-longer')}>Hacer más largo</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>}
+
+      {/* --- BOTÓN NUEVO: Sugerir Enlaces con IA --- */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onSuggestLinks}
+            className="p-2 rounded transition-colors hover:bg-accent/20"
+          >
+            <Sparkles className="w-4 h-4 text-yellow-400" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Sugerir enlaces internos con IA</p>
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 };

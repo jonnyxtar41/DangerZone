@@ -68,3 +68,21 @@ This document outlines the architecture, components, and data flow of the Zona V
 - `pages/Home.jsx`: The landing page of the site.
 - `pages/Recursos.jsx`: The main blog/resource listing page. It fetches and displays all posts and allows filtering by category via URL query parameters.
 - `pages/Post.jsx`: The detail page for a single post. It fetches the post data based on the `slug` from the URL and renders its content.
+
+8. DEPLOYMENT & ROUTING IN PRODUCTION
+========================================
+- **Problem**: When a user reloads or directly accesses a URL like `/blog/my-post`, the server looks for a file at that path. Since this is a Single Page Application (SPA), the file doesn't exist, and the server might return a 404 error or redirect to the homepage.
+- **Solution**: The `public/.htaccess` file contains rules for Apache servers (common in hosting like Hostinger) to handle this.
+- **How it Works**: The following rules instruct the server:
+  ```
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+  ```
+  This means: "If the requested path is not an existing file (`!-f`) and not an existing directory (`!-d`), then serve `index.html` instead."
+- **Result**: The browser loads `index.html`, the React application starts, and React Router reads the original URL from the address bar, correctly displaying the requested page.
+- **Deployment**: To fix the reloading issue in production, you must:
+  1. Ensure the `.htaccess` file is in the `public/` directory.
+  2. Run `npm run build` to generate the production-ready `dist/` folder. Vite automatically copies `.htaccess` into it.
+  3. Upload the entire contents of the `dist/` folder to your server's root directory (e.g., `public_html`).

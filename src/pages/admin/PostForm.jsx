@@ -7,7 +7,7 @@ import PostFormSidebar from '@/pages/admin/post-form/PostFormSidebar';
 import PostFormSeo from '@/pages/admin/post-form/PostFormSeo';
 import PostFormCustomFields from '@/pages/admin/post-form/PostFormCustomFields';
 import PostPreview from '@/pages/admin/post-form/PostPreview';
-import { Save, Send, PlusCircle, Trash2, Edit, Eye, CalendarClock } from 'lucide-react';
+import { Save, Send, PlusCircle, Trash2, Edit, Eye, CalendarClock, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { getCategories } from '@/lib/supabase/categories';
 import { getSubcategories } from '@/lib/supabase/subcategories';
@@ -15,10 +15,11 @@ import { useNavigate } from 'react-router-dom';
 import TiptapEditor from '@/components/TiptapEditor';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { deletePost } from '@/lib/supabase/posts';
+import { deletePost, getPosts } from '@/lib/supabase/posts';
 import { uploadDownloadableAsset } from '@/lib/supabase/assets';
 import { Textarea } from '@/components/ui/textarea';
-import { supabase } from '@/lib/customSupabaseClient'; // <-- Importante: Añadir esta línea
+import { supabase } from '@/lib/customSupabaseClient';
+import InternalLinkModal from '@/components/InternalLinkModal'; // <-- Importa el nuevo modal
 
 const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) => {
     const { toast } = useToast();
@@ -53,8 +54,7 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
     const [isDiscountActive, setIsDiscountActive] = useState(initialData.is_discount_active || false);
     const [discountPercentage, setDiscountPercentage] = useState(initialData.discount_percentage || '');
     const [isFeatured, setIsFeatured] = useState(initialData.is_featured || false);
-    // New features state
-    const [view, setView] = useState('edit'); // 'edit' or 'preview'
+    const [view, setView] = useState('edit');
     const [isScheduled, setIsScheduled] = useState(!!initialData.published_at && new Date(initialData.published_at) > new Date());
     const [publishedAt, setPublishedAt] = useState(initialData.published_at ? new Date(initialData.published_at).toISOString().slice(0, 16) : '');
     const [customFields, setCustomFields] = useState(initialData.custom_fields || []);
@@ -67,9 +67,124 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
     const [isAiPromptOpen, setIsAiPromptOpen] = useState(false);
     const [customPrompt, setCustomPrompt] = useState('');
     const [isUploading, setIsUploading] = useState(false);
+    
+    // --- Nuevos estados para enlaces internos ---
+    const [isInternalLinkModalOpen, setInternalLinkModalOpen] = useState(false);
+    const [linkSuggestions, setLinkSuggestions] = useState([]);
+    const [isSuggestingLinks, setIsSuggestingLinks] = useState(false);
 
     const isEditing = !!initialData.id;
     const isAdmin = permissions?.['manage-content'];
+
+    // --- Nueva función para aplicar el enlace seleccionado ---
+    const handleSelectInternalLink = (url) => {
+        if (editorRef.current) {
+            const { from, to } = editorRef.current.state.selection;
+            if (from === to) { // Si no hay texto seleccionado, solo inserta la URL
+                editorRef.current.chain().focus().insertContent(url).run();
+            } else { // Si hay texto seleccionado, lo convierte en enlace
+                editorRef.current.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+            }
+        }
+        setInternalLinkModalOpen(false);
+    };
+
+    // --- Nueva función para sugerir enlaces con IA ---
+    const handleSuggestLinks = async () => {
+        if (!editorRef.current) return;
+        setIsSuggestingLinks(true);
+        toast({ title: '🤖 Buscando sugerencias de enlaces...' });
+
+        try {
+            const { data: allPosts } = await getPosts({ limit: 1000, includeDrafts: false, includePending: false });
+            if (!allPosts) throw new Error("No se pudieron obtener los posts existentes.");
+
+            const postTitles = allPosts.map(p => ({ title: p.title, url: `/${p.sections?.slug || 'blog'}/${p.slug}` }));
+            const textContent = editorRef.current.getText();
+
+            const prompt = `
+                Analiza el siguiente texto de un artículo y sugiere enlaces internos a otros posts existentes de la lista proporcionada.
+
+                Texto del Artículo a analizar:
+                ---
+                ${textContent.substring(0, 4000)}
+                ---
+
+                Lista de posts existentes disponibles para enlazar (formato: {título, url}):
+                ---
+                ${JSON.stringify(postTitles)}
+                ---
+
+                Basado en el texto, identifica frases clave y sugiere a qué post existente de la lista podrían enlazar.
+                Devuelve únicamente un array JSON con objetos. Cada objeto debe tener las claves "phrase" (la frase exacta del texto a enlazar) y "url" (la URL del post sugerido).
+                Ejemplo de respuesta: [{"phrase": "crear un juego en Roblox", "url": "/recursos/guia-roblox"}]
+                Solo incluye sugerencias altamente relevantes. Si no hay ninguna sugerencia clara, devuelve un array vacío [].
+            `;
+
+            const { data, error } = await supabase.functions.invoke('ai-assistant', {
+                body: { prompt },
+            });
+
+            if (error || data.error) throw new Error(error?.message || data.error);
+
+            // Intentar parsear la respuesta de la IA
+            let suggestions = [];
+            try {
+                suggestions = JSON.parse(data.response);
+                if (!Array.isArray(suggestions)) suggestions = [];
+            } catch (e) {
+                console.error("La respuesta de la IA no es un JSON válido:", data.response);
+                suggestions = [];
+            }
+
+            setLinkSuggestions(suggestions);
+
+            if (suggestions.length > 0) {
+                toast({ title: `💡 Se encontraron ${suggestions.length} sugerencias de enlaces.` });
+            } else {
+                toast({ title: 'No se encontraron sugerencias claras.' });
+            }
+
+        } catch (err) {
+            toast({ title: 'Error al sugerir enlaces', description: err.message, variant: 'destructive' });
+        } finally {
+            setIsSuggestingLinks(false);
+        }
+    };
+    
+    const applySuggestion = (suggestion) => {
+        const { phrase, url } = suggestion;
+        const { state, view } = editorRef.current;
+        const { from, to } = state.selection;
+        let applied = false;
+
+        // Itera sobre el contenido para encontrar la frase
+        state.doc.descendants((node, pos) => {
+            if (!node.isText) return;
+
+            const text = node.text;
+            let index = text.indexOf(phrase);
+            while (index >= 0) {
+                const start = pos + index;
+                const end = start + phrase.length;
+
+                // Aplica el enlace y marca como aplicado
+                editorRef.current.chain().focus().setTextSelection({ from: start, to: end }).setLink({ href: url }).run();
+                applied = true;
+
+                // Busca la siguiente ocurrencia
+                index = text.indexOf(phrase, index + 1);
+            }
+        });
+        
+        if(applied) {
+            toast({ title: '✅ Enlace aplicado', description: `Se enlazó la frase "${phrase}".` });
+            // Opcional: remover la sugerencia de la lista una vez aplicada
+            setLinkSuggestions(prev => prev.filter(s => s.phrase !== phrase));
+        } else {
+            toast({ title: 'No se pudo aplicar', description: 'No se encontró la frase exacta en el texto.', variant: 'destructive' });
+        }
+    };
 
     const handleAiAction = useCallback(async (action, promptOverride = '') => {
         setIsAiLoading(true);
@@ -119,7 +234,6 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
                     throw new Error('Acción de IA no reconocida');
             }
 
-            // --- LLAMADA A TU FUNCIÓN DE SUPABASE ---
             const { data, error } = await supabase.functions.invoke('ai-assistant', {
                 body: { prompt },
             });
@@ -133,7 +247,6 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
             }
 
             const response = data.response;
-            // --- FIN DE LA LLAMADA ---
 
             if (!response) {
                 throw new Error('La IA no devolvió una respuesta válida.');
@@ -335,9 +448,8 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
         setCustomFields([]);
         setIsFeatured(false);
         setCommentsEnabled(false);
-        setIsSaved(false); // Importante para volver a mostrar el formulario
+        setIsSaved(false);
         
-        // Limpiar el input del archivo de descarga
         const downloadFileInput = document.querySelector('input[type="file"]');
         if (downloadFileInput) {
             downloadFileInput.value = '';
@@ -393,7 +505,30 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
                                 postSubcategory={postSubcategoryId} setPostSubcategory={setPostSubcategoryId} availableSubcategories={availableSubcategories}
                                 excerpt={excerpt} setExcerpt={setExcerpt} onAiAction={handleAiAction} isAiLoading={isAiLoading}
                             />
-                            <TiptapEditor content={content} onChange={setContent} onAiAction={handleAiAction} onGenerateContent={handleGenerateContentClick} getEditor={(editor) => { editorRef.current = editor; }} />
+                            <TiptapEditor
+                                content={content}
+                                onChange={setContent}
+                                onAiAction={handleAiAction}
+                                onGenerateContent={handleGenerateContentClick}
+                                getEditor={(editor) => { editorRef.current = editor; }}
+                                onInternalLink={() => setInternalLinkModalOpen(true)} // Nueva prop
+                                onSuggestLinks={handleSuggestLinks} // Nueva prop
+                            />
+                            {linkSuggestions.length > 0 && (
+                                <div className="mt-4 p-4 glass-effect rounded-lg">
+                                    <h4 className="font-bold mb-2">Sugerencias de Enlaces con IA</h4>
+                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                        {linkSuggestions.map((suggestion, index) => (
+                                            <div key={index} className="flex justify-between items-center p-2 bg-background/50 rounded">
+                                                <p className="text-sm">
+                                                    Enlazar "<strong>{suggestion.phrase}</strong>" a <em className="text-primary">{suggestion.url}</em>
+                                                </p>
+                                                <Button size="sm" onClick={() => applySuggestion(suggestion)}>Aplicar</Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                              <PostFormCustomFields customFields={customFields} setCustomFields={setCustomFields} />
                         </div>
                         <PostFormSidebar
@@ -481,6 +616,13 @@ const PostForm = ({ sections, onSave, onNewPost, initialData = {}, onUpdate }) =
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* --- Renderizado del nuevo Modal --- */}
+            <InternalLinkModal
+                open={isInternalLinkModalOpen}
+                onOpenChange={setInternalLinkModalOpen}
+                onSelectPost={handleSelectInternalLink}
+            />
         </motion.div>
     );
 };
