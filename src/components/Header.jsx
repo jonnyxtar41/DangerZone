@@ -1,15 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-
 import { Menu, X, Home, MoreHorizontal, ChevronDown, Heart } from 'lucide-react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useLayout } from '@/context/LayoutContext.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import * as Icons from 'lucide-react';
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 
 const Header = ({ sections = [], siteContent = {} }) => {
     const { isSidePanelOpen, toggleSidePanel } = useLayout();
+    const navigate = useNavigate();
 
     const mainSections = sections.filter(s => s.is_main).sort((a, b) => a.order - b.order).slice(0, 3);
     const moreSections = sections.filter(s => !mainSections.some(ms => ms.id === s.id));
@@ -92,16 +92,15 @@ const Header = ({ sections = [], siteContent = {} }) => {
                         </div>
 
                         <div className="pl-4">
-                            <Button asChild className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white font-semibold rounded-full pulse-glow-orange">
-                                <Link to="/donar">
-                                    <Heart className="w-4 h-4 mr-2" />
-                                    Apoyar
-                                </Link>
+                            <Button
+                                onClick={() => navigate('/donar')}
+                                className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white font-semibold rounded-full pulse-glow-orange"
+                            >
+                                <Heart className="w-4 h-4 mr-2" />
+                                Apoyar
                             </Button>
                         </div>
                     </div>
-
-
                 </div>
             </nav>
         </motion.header>

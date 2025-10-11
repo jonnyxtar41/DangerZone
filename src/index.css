@@ -269,3 +269,17 @@
     .ProseMirror td .resizable-image-wrapper[data-align="right"] {
       justify-content: flex-end;
     }
+    @layer utilities {
+      .pulse-glow-orange {
+        animation: pulse-glow-orange 2s infinite;
+      }
+
+      @keyframes pulse-glow-orange {
+        0%, 100% {
+          box-shadow: 0 0 5px #f97316, 0 0 10px #f97316;
+        }
+        50% {
+          box-shadow: 0 0 20px #f97316, 0 0 30px #f97316;
+        }
+      }
+    }
