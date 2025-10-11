@@ -204,7 +204,8 @@ logger.error = (msg, options) => {
 export default defineConfig({
 	customLogger: logger,
 	plugins: [
-		...(isDev ? [inlineEditPlugin(), editModeDevPlugin(), iframeRouteRestorationPlugin()] : []),
+		//...(isDev ? [inlineEditPlugin(), editModeDevPlugin(), iframeRouteRestorationPlugin()] : []), 
+    	...(isDev ? [inlineEditPlugin(), editModeDevPlugin()] : []), // DÉJALA ASÍ
 		react(),
 		addTransformIndexHtml
 	],
